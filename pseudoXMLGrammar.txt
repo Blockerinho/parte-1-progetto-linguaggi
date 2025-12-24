@@ -1,0 +1,27 @@
+
+comment "#" ; 
+
+entrypoints SourceFile ; 
+
+SourceFile = file ; 
+
+file = [sectionDecl] | [import] [sectionDecl]; 
+
+sectionDecl = "<section name=" Ident ">" sectionContent "</section>" ; 
+
+import = "<import>" filePath "</import>" ;
+filePath = String ;
+
+sectionContent = [fieldDecl] | [inherit] [fieldDecl] ; 
+
+fieldDecl = "<field name=" Ident ">" Value "</field>" ; 
+
+inherit = "<inherit>" sectionName "</inherit>" ; 
+
+Value = Integer | Boolean | '"' String '"' | NonLocVar ; 
+
+Boolean = "true" | "false" ;
+
+NonLocVar = "$" Ident | "$" Ident "." Ident ; 
+
+token Ident letter (letter | digit | '_')* ;
