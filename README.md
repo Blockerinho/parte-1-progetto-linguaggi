@@ -2,7 +2,7 @@
 
 Checklist delle cose da fare:
 
-- [] Definire la grammatica della sintatti; 
+- [] Definire la grammatica della sintassi; 
 - [] Implementare un parser e relativo lexer; 
 	- [] struttura dati contenete i valori associati ad ogni variabile; 
 		- [] funzioni di costruzione per il parser; 
