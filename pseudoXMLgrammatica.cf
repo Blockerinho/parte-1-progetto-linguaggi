@@ -1,34 +1,45 @@
-entrypoints SourceFile ; 
+entrypoints SourceFile ;
+comment "#" ;
 
-comment "#" ; 
+-- File principale
+SourceFile.     SourceFile ::= File ;
+SimpleFile.     File ::= [SectionDecl] ;
+FileWImport.    File ::= [Import] [SectionDecl] ;
+separator SectionDecl " "; 
+separator Import " "; 
 
-SourceFile. 	SourceFile ::= File ; 
+-- Import
+FileImport.     Import ::= "<import>" FilePath "</import>" ;
+Path.           FilePath ::= String ;
 
-SimpleFile. 	File ::= [SectionDecl] ; 
-FileWImport. 	File :: = [Import] [SectionDecl] ; 
+-- Sezioni
+SectionDecl.    SectionDecl ::= "<section" "name" "=" Ident ">" SectionContent "</section>" ;
 
-SectionDecl.	SectionDecl ::= "<section name="Ident ">" SectionContent "</section>" ; 
+-- Contenuto sezione
+SimpleSecCont.  SectionContent ::= [FieldDecl] ;
+SecContent.     SectionContent ::= [Inherit] [FieldDecl] ;
+separator FieldDecl " "; 
+separator Inherit " "; 
 
-FileImport. 	Import ::= "<import>" FilePath "</import>" ; 
-Path. 			FilePath ::= String ; 
+-- Eredità
+InheritSection. Inherit ::= "<inherit>" SectionName "</inherit>" ;
+SecName.        SectionName ::= Ident ;
 
-SecContent. 	SectionContent ::= [FieldDecl] ; 
-SecContent. 	SectionContent ::= [Inherit] [FieldDecl] ; 
+-- Campi
+FieldDeclar.    FieldDecl ::= "<field" "name" "=" Ident ">" Value "</field>" ;
 
-FieldDeclar.	FieldDecl ::= "<field name=" Ident ">" Value "</field>" ; 
+-- Valori
+ValueInt.       Value ::= Integer ;
+ValueBool.      Value ::= Boolean ;
+ValueString.    Value ::= String ;
+ValueNonLoc.    Value ::= NonLocVar ;
 
-InheritSection.	Inherit ::= "<inherit>" SectionName "</inherit>" ; 
+-- Booleani
+rules Boolean ::= "true" | "false" ;
 
-SecName. 		SectionName ::= String ; 
+-- Variabili non locali
+SimpleNonLoc.   NonLocVar ::= "$" Ident ;
+NonLoc.         NonLocVar ::= "$" Ident "." Ident ;
 
-ValueInt.		Value ::= Integer ; 
-ValueBool.		Value ::= Boolean ; 
-ValueString.	Value ::= '"' String '"' ; 
-ValueNonLoc.	Value ::= NonLocVar ; 
-
-rules Bool ::= "true" | "false" ;
-
-SimpleNonLoc. 	NonLocVar ::= "$" Ident ; 
-NonLoc. 		NonLocVar ::= "$" Ident "." Ident ; 
-
+-- Token identificatori
 token Ident letter (letter | digit | '_')* ;

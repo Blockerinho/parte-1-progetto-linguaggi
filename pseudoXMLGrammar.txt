@@ -20,7 +20,7 @@ inherit = "<inherit>" sectionName "</inherit>" ;
 
 Value = Integer | Boolean | '"' String '"' | NonLocVar ; 
 
-rules Bool ::= "true" | "false" ;
+Boolean = "true" | "false" ;
 
 NonLocVar = "$" Ident | "$" Ident "." Ident ; 
 
