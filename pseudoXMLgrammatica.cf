@@ -1,1 +1,34 @@
-pseudoXMLGrammatica
+entrypoints SourceFile ; 
+
+comment "#" ; 
+
+SourceFile. 	SourceFile ::= File ; 
+
+SimpleFile. 	File ::= [SectionDecl] ; 
+FileWImport. 	File :: = [Import] [SectionDecl] ; 
+
+SectionDecl.	SectionDecl ::= "<section name="Ident ">" SectionContent "</section>" ; 
+
+FileImport. 	Import ::= "<import>" FilePath "</import>" ; 
+Path. 			FilePath ::= String ; 
+
+SecContent. 	SectionContent ::= [FieldDecl] ; 
+SecContent. 	SectionContent ::= [Inherit] [FieldDecl] ; 
+
+FieldDeclar.	FieldDecl ::= "<field name=" Ident ">" Value "</field>" ; 
+
+InheritSection.	Inherit ::= "<inherit>" SectionName "</inherit>" ; 
+
+SecName. 		SectionName ::= String ; 
+
+ValueInt.		Value ::= Integer ; 
+ValueBool.		Value ::= Boolean ; 
+ValueString.	Value ::= '"' String '"' ; 
+ValueNonLoc.	Value ::= NonLocVar ; 
+
+rules Bool ::= "true" | "false" ;
+
+SimpleNonLoc. 	NonLocVar ::= "$" Ident ; 
+NonLoc. 		NonLocVar ::= "$" Ident "." Ident ; 
+
+token Ident letter (letter | digit | '_')* ;
