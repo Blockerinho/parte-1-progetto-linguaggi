@@ -28,4 +28,7 @@ Se crea conflitti di definizione si deve generare un errore che nomini tutte le 
 
 Le dichiarazioni locali di variabili sovrascrivono le ereditate. 
 
-![Alt text](sintassi.png "Sintassi")
+![alt text](sintassi.png "Sintassi")
+
+La grammatica di XML, da cui "prendere"spunto, è definita in:
+https://www.w3.org/TR/xml/
