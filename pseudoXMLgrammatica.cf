@@ -2,7 +2,7 @@ entrypoints SourceFile ;
 comment "#" ;
 
 -- File principale
-SourceFile.     SourceFile ::= File ;
+MainFile.       SourceFile ::= File ;     
 SimpleFile.     File ::= [SectionDecl] ;
 FileWImport.    File ::= [Import] [SectionDecl] ;
 separator SectionDecl ""; 
@@ -13,7 +13,7 @@ FileImport.     Import ::= "<" "import" ">" FilePath "<" "/" "import" ">" ;
 Path.           FilePath ::= String ;
 
 -- Sezioni
-SectionDecl.    SectionDecl ::= "<" "section" "name" "=" Ident ">" SectionContent "<" "/" "section" ">" ;
+SecDecl.        SectionDecl ::= "<" "section" "name" "=" Ident ">" SectionContent "<" "/" "section" ">" ;
 
 -- Contenuto sezione
 SimpleSecCont.  SectionContent ::= [FieldDecl] ;
