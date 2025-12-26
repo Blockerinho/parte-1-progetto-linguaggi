@@ -22,8 +22,7 @@ separator FieldDecl "";
 separator Inherit ""; 
 
 -- Eredità
-InheritSection. Inherit ::= "<" "inherit" ">" SectionName "<" "/" "inherit" ">" ;
-SecName.        SectionName ::= Ident ;
+InheritSection. Inherit ::= "<" "inherit" ">" Ident "<" "/" "inherit" ">" ;
 
 -- Campi
 FieldDeclar.    FieldDecl ::= "<" "field" "name" "=" Ident ">" Value "<" "/" "field" ">" ;
