@@ -133,29 +133,44 @@ extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 
 %%
 
-SourceFile : ListTopLevelTag { $$ = make_MainFile(reverseListTopLevelTag($1)); result->sourcefile_ = $$; }
+SourceFile
+  : ListTopLevelTag { $$ = make_MainFile(reverseListTopLevelTag($1)); result->sourcefile_ = $$; }
 ;
-ListTopLevelTag : /* empty */ { $$ = 0; }
+
+ListTopLevelTag
+  : /* empty */ { $$ = 0; }
   | ListTopLevelTag TopLevelTag { $$ = make_ListTopLevelTag($2, $1); }
 ;
-TopLevelTag : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4); }
+
+TopLevelTag
+  : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4); }
   | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); }
 ;
-ListSubLevelTag : /* empty */ { $$ = 0; }
+
+ListSubLevelTag
+  : /* empty */ { $$ = 0; }
   | ListSubLevelTag SubLevelTag { $$ = make_ListSubLevelTag($2, $1); }
 ;
-SubLevelTag : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); }
+
+SubLevelTag
+  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); }
   | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4); }
 ;
-Value : _INTEGER_ { $$ = make_ValueInt($1); }
+
+Value
+  : _INTEGER_ { $$ = make_ValueInt($1); }
   | Boolean { $$ = make_ValueBool($1); }
   | _STRING_ { $$ = make_ValueString($1); }
   | NonLocVar { $$ = make_ValueNonLoc($1); }
 ;
-Boolean : _KW_true { $$ = make_Boolean_true(); }
+
+Boolean
+  : _KW_true { $$ = make_Boolean_true(); }
   | _KW_false { $$ = make_Boolean_false(); }
 ;
-NonLocVar : _DOLLAR T_Ident { $$ = make_SimpleNonLoc($2); }
+
+NonLocVar
+  : _DOLLAR T_Ident { $$ = make_SimpleNonLoc($2); }
   | _DOLLAR T_Ident _DOT T_Ident { $$ = make_NonLoc($2, $4); }
 ;
 
