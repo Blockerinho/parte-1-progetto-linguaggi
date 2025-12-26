@@ -2,16 +2,16 @@
 
 Checklist delle cose da fare:
 
-- [] Definire la grammatica della sintassi; 
-- [] Implementare un parser e relativo lexer; 
-	- [] struttura dati contenete i valori associati ad ogni variabile; 
-		- [] funzioni di costruzione per il parser; 
-		- [] funzioni di cancellazione di una sezione; 
-		- [] funzioni di binding singolo; 
-- [] Implementare pretty-prenting; 
-- [] Predisporre test case ; 
-- [] Definire descrizione sintetica della soluzione; 
-- [] Fornire MakeFile; 
+- [ ] Definire la grammatica della sintassi; 
+- [ ] Implementare un parser e relativo lexer; 
+	- [ ] struttura dati contenete i valori associati ad ogni variabile; 
+		- [ ] funzioni di costruzione per il parser; 
+		- [ ] funzioni di cancellazione di una sezione; 
+		- [ ] funzioni di binding singolo; 
+- [ ] Implementare pretty-printing; 
+- [ ] Predisporre test case ; 
+- [ ] Definire descrizione sintetica della soluzione; 
+- [ ] Fornire MakeFile; 
 
 # Sintassi 
 Il file è composto da una sequenza di sezioni identificate dal tag **section** il cui nome è dato dall'attributo **name**.
