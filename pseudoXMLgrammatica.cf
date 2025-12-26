@@ -5,28 +5,28 @@ comment "#" ;
 SourceFile.     SourceFile ::= File ;
 SimpleFile.     File ::= [SectionDecl] ;
 FileWImport.    File ::= [Import] [SectionDecl] ;
-separator SectionDecl " "; 
-separator Import " "; 
+separator SectionDecl ""; 
+separator Import ""; 
 
 -- Import
-FileImport.     Import ::= "<import>" FilePath "</import>" ;
+FileImport.     Import ::= "<" "import" ">" FilePath "<" "/" "import" ">" ;
 Path.           FilePath ::= String ;
 
 -- Sezioni
-SectionDecl.    SectionDecl ::= "<section" "name" "=" Ident ">" SectionContent "</section>" ;
+SectionDecl.    SectionDecl ::= "<" "section" "name" "=" Ident ">" SectionContent "<" "/" "section" ">" ;
 
 -- Contenuto sezione
 SimpleSecCont.  SectionContent ::= [FieldDecl] ;
 SecContent.     SectionContent ::= [Inherit] [FieldDecl] ;
-separator FieldDecl " "; 
-separator Inherit " "; 
+separator FieldDecl ""; 
+separator Inherit ""; 
 
 -- Eredità
-InheritSection. Inherit ::= "<inherit>" SectionName "</inherit>" ;
+InheritSection. Inherit ::= "<" "inherit" ">" SectionName "<" "/" "inherit" ">" ;
 SecName.        SectionName ::= Ident ;
 
 -- Campi
-FieldDeclar.    FieldDecl ::= "<field" "name" "=" Ident ">" Value "</field>" ;
+FieldDeclar.    FieldDecl ::= "<" "field" "name" "=" Ident ">" Value "<" "/" "field" ">" ;
 
 -- Valori
 ValueInt.       Value ::= Integer ;
