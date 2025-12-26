@@ -43,53 +43,27 @@ extern char* pseudo_xm_lgrammatica_get_text(yyscan_t scanner);
 extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 
 /* List reversal functions. */
-ListSectionDecl reverseListSectionDecl(ListSectionDecl l)
+ListTopLevelTag reverseListTopLevelTag(ListTopLevelTag l)
 {
-  ListSectionDecl prev = 0;
-  ListSectionDecl tmp = 0;
+  ListTopLevelTag prev = 0;
+  ListTopLevelTag tmp = 0;
   while (l)
   {
-    tmp = l->listsectiondecl_;
-    l->listsectiondecl_ = prev;
+    tmp = l->listtopleveltag_;
+    l->listtopleveltag_ = prev;
     prev = l;
     l = tmp;
   }
   return prev;
 }
-ListImport reverseListImport(ListImport l)
+ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
 {
-  ListImport prev = 0;
-  ListImport tmp = 0;
+  ListSubLevelTag prev = 0;
+  ListSubLevelTag tmp = 0;
   while (l)
   {
-    tmp = l->listimport_;
-    l->listimport_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-ListFieldDecl reverseListFieldDecl(ListFieldDecl l)
-{
-  ListFieldDecl prev = 0;
-  ListFieldDecl tmp = 0;
-  while (l)
-  {
-    tmp = l->listfielddecl_;
-    l->listfielddecl_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-ListInherit reverseListInherit(ListInherit l)
-{
-  ListInherit prev = 0;
-  ListInherit tmp = 0;
-  while (l)
-  {
-    tmp = l->listinherit_;
-    l->listinherit_ = prev;
+    tmp = l->listsubleveltag_;
+    l->listsubleveltag_ = prev;
     prev = l;
     l = tmp;
   }
@@ -106,17 +80,10 @@ ListInherit reverseListInherit(ListInherit l)
   double _double;
   char*  _string;
   SourceFile sourcefile_;
-  File file_;
-  ListSectionDecl listsectiondecl_;
-  ListImport listimport_;
-  Import import_;
-  FilePath filepath_;
-  SectionDecl sectiondecl_;
-  SectionContent sectioncontent_;
-  ListFieldDecl listfielddecl_;
-  ListInherit listinherit_;
-  Inherit inherit_;
-  FieldDecl fielddecl_;
+  ListTopLevelTag listtopleveltag_;
+  TopLevelTag topleveltag_;
+  ListSubLevelTag listsubleveltag_;
+  SubLevelTag subleveltag_;
   Value value_;
   Boolean boolean_;
   NonLocVar nonlocvar_;
@@ -154,17 +121,10 @@ extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 %token<_string> _IDENT_
 
 %type <sourcefile_> SourceFile
-%type <file_> File
-%type <listsectiondecl_> ListSectionDecl
-%type <listimport_> ListImport
-%type <import_> Import
-%type <filepath_> FilePath
-%type <sectiondecl_> SectionDecl
-%type <sectioncontent_> SectionContent
-%type <listfielddecl_> ListFieldDecl
-%type <listinherit_> ListInherit
-%type <inherit_> Inherit
-%type <fielddecl_> FieldDecl
+%type <listtopleveltag_> ListTopLevelTag
+%type <topleveltag_> TopLevelTag
+%type <listsubleveltag_> ListSubLevelTag
+%type <subleveltag_> SubLevelTag
 %type <value_> Value
 %type <boolean_> Boolean
 %type <nonlocvar_> NonLocVar
@@ -173,35 +133,19 @@ extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 
 %%
 
-SourceFile : File { $$ = make_MainFile($1); result->sourcefile_ = $$; }
+SourceFile : ListTopLevelTag { $$ = make_MainFile(reverseListTopLevelTag($1)); result->sourcefile_ = $$; }
 ;
-File : ListSectionDecl { $$ = make_SimpleFile(reverseListSectionDecl($1)); }
-  | ListImport ListSectionDecl { $$ = make_FileWImport(reverseListImport($1), reverseListSectionDecl($2)); }
+ListTopLevelTag : /* empty */ { $$ = 0; }
+  | ListTopLevelTag TopLevelTag { $$ = make_ListTopLevelTag($2, $1); }
 ;
-ListSectionDecl : /* empty */ { $$ = 0; }
-  | ListSectionDecl SectionDecl { $$ = make_ListSectionDecl($2, $1); }
+TopLevelTag : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4); }
+  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); }
 ;
-ListImport : /* empty */ { $$ = 0; }
-  | ListImport Import { $$ = make_ListImport($2, $1); }
+ListSubLevelTag : /* empty */ { $$ = 0; }
+  | ListSubLevelTag SubLevelTag { $$ = make_ListSubLevelTag($2, $1); }
 ;
-Import : _LT _KW_import _GT FilePath _LT _SLASH _KW_import _GT { $$ = make_FileImport($4); }
-;
-FilePath : _STRING_ { $$ = make_Path($1); }
-;
-SectionDecl : _LT _KW_section _KW_name _EQ T_Ident _GT SectionContent _LT _SLASH _KW_section _GT { $$ = make_SecDecl($5, $7); }
-;
-SectionContent : ListFieldDecl { $$ = make_SimpleSecCont(reverseListFieldDecl($1)); }
-  | ListInherit ListFieldDecl { $$ = make_SecContent(reverseListInherit($1), reverseListFieldDecl($2)); }
-;
-ListFieldDecl : /* empty */ { $$ = 0; }
-  | ListFieldDecl FieldDecl { $$ = make_ListFieldDecl($2, $1); }
-;
-ListInherit : /* empty */ { $$ = 0; }
-  | ListInherit Inherit { $$ = make_ListInherit($2, $1); }
-;
-Inherit : _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritSection($4); }
-;
-FieldDecl : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldDeclar($5, $7); }
+SubLevelTag : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); }
+  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4); }
 ;
 Value : _INTEGER_ { $$ = make_ValueInt($1); }
   | Boolean { $$ = make_ValueBool($1); }

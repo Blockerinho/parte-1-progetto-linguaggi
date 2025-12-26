@@ -138,7 +138,7 @@ void ppSourceFile(SourceFile p, int _i_)
   {
   case is_MainFile:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppFile(p->u.mainFile_.file_, 0);
+    ppListTopLevelTag(p->u.mainFile_.listtopleveltag_, 0);
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
@@ -148,63 +148,28 @@ void ppSourceFile(SourceFile p, int _i_)
   }
 }
 
-void ppFile(File p, int _i_)
+void ppListTopLevelTag(ListTopLevelTag listtopleveltag, int i)
 {
-  switch(p->kind)
-  {
-  case is_SimpleFile:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppListSectionDecl(p->u.simpleFile_.listsectiondecl_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_FileWImport:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppListImport(p->u.fileWImport_.listimport_, 0);
-    ppListSectionDecl(p->u.fileWImport_.listsectiondecl_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing File!\n");
-    exit(1);
-  }
-}
-
-void ppListSectionDecl(ListSectionDecl listsectiondecl, int i)
-{
-  if (listsectiondecl == 0)
+  if (listtopleveltag == 0)
   { /* nil */
   }
   else
   { /* cons */
-    ppSectionDecl(listsectiondecl->sectiondecl_, 0);
-    ppListSectionDecl(listsectiondecl->listsectiondecl_, 0);
+    ppTopLevelTag(listtopleveltag->topleveltag_, 0);
+    ppListTopLevelTag(listtopleveltag->listtopleveltag_, 0);
   }
 }
 
-void ppListImport(ListImport listimport, int i)
-{
-  if (listimport == 0)
-  { /* nil */
-  }
-  else
-  { /* cons */
-    ppImport(listimport->import_, 0);
-    ppListImport(listimport->listimport_, 0);
-  }
-}
-
-void ppImport(Import p, int _i_)
+void ppTopLevelTag(TopLevelTag p, int _i_)
 {
   switch(p->kind)
   {
-  case is_FileImport:
+  case is_FileImportTag:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('<');
     renderS("import");
     renderC('>');
-    ppFilePath(p->u.fileImport_.filepath_, 0);
+    ppString(p->u.fileImportTag_.string_, 0);
     renderC('<');
     renderC('/');
     renderS("import");
@@ -212,41 +177,15 @@ void ppImport(Import p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  default:
-    fprintf(stderr, "Error: bad kind field when printing Import!\n");
-    exit(1);
-  }
-}
-
-void ppFilePath(FilePath p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_Path:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppString(p->u.path_.string_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing FilePath!\n");
-    exit(1);
-  }
-}
-
-void ppSectionDecl(SectionDecl p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_SecDecl:
+  case is_SectionTag:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('<');
     renderS("section");
     renderS("name");
     renderC('=');
-    ppIdent(p->u.secDecl_.ident_, 0);
+    ppIdent(p->u.sectionTag_.ident_, 0);
     renderC('>');
-    ppSectionContent(p->u.secDecl_.sectioncontent_, 0);
+    ppListSubLevelTag(p->u.sectionTag_.listsubleveltag_, 0);
     renderC('<');
     renderC('/');
     renderS("section");
@@ -255,94 +194,36 @@ void ppSectionDecl(SectionDecl p, int _i_)
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when printing SectionDecl!\n");
+    fprintf(stderr, "Error: bad kind field when printing TopLevelTag!\n");
     exit(1);
   }
 }
 
-void ppSectionContent(SectionContent p, int _i_)
+void ppListSubLevelTag(ListSubLevelTag listsubleveltag, int i)
 {
-  switch(p->kind)
-  {
-  case is_SimpleSecCont:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppListFieldDecl(p->u.simpleSecCont_.listfielddecl_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_SecContent:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppListInherit(p->u.secContent_.listinherit_, 0);
-    ppListFieldDecl(p->u.secContent_.listfielddecl_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SectionContent!\n");
-    exit(1);
-  }
-}
-
-void ppListFieldDecl(ListFieldDecl listfielddecl, int i)
-{
-  if (listfielddecl == 0)
+  if (listsubleveltag == 0)
   { /* nil */
   }
   else
   { /* cons */
-    ppFieldDecl(listfielddecl->fielddecl_, 0);
-    ppListFieldDecl(listfielddecl->listfielddecl_, 0);
+    ppSubLevelTag(listsubleveltag->subleveltag_, 0);
+    ppListSubLevelTag(listsubleveltag->listsubleveltag_, 0);
   }
 }
 
-void ppListInherit(ListInherit listinherit, int i)
-{
-  if (listinherit == 0)
-  { /* nil */
-  }
-  else
-  { /* cons */
-    ppInherit(listinherit->inherit_, 0);
-    ppListInherit(listinherit->listinherit_, 0);
-  }
-}
-
-void ppInherit(Inherit p, int _i_)
+void ppSubLevelTag(SubLevelTag p, int _i_)
 {
   switch(p->kind)
   {
-  case is_InheritSection:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-    renderS("inherit");
-    renderC('>');
-    ppIdent(p->u.inheritSection_.ident_, 0);
-    renderC('<');
-    renderC('/');
-    renderS("inherit");
-    renderC('>');
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing Inherit!\n");
-    exit(1);
-  }
-}
-
-void ppFieldDecl(FieldDecl p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_FieldDeclar:
+  case is_FieldTag:
     if (_i_ > 0) renderC(_L_PAREN);
     renderC('<');
     renderS("field");
     renderS("name");
     renderC('=');
-    ppIdent(p->u.fieldDeclar_.ident_, 0);
+    ppIdent(p->u.fieldTag_.ident_, 0);
     renderC('>');
-    ppValue(p->u.fieldDeclar_.value_, 0);
+    ppValue(p->u.fieldTag_.value_, 0);
     renderC('<');
     renderC('/');
     renderS("field");
@@ -350,8 +231,21 @@ void ppFieldDecl(FieldDecl p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
+  case is_InheritTag:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderC('<');
+    renderS("inherit");
+    renderC('>');
+    ppIdent(p->u.inheritTag_.ident_, 0);
+    renderC('<');
+    renderC('/');
+    renderS("inherit");
+    renderC('>');
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
   default:
-    fprintf(stderr, "Error: bad kind field when printing FieldDecl!\n");
+    fprintf(stderr, "Error: bad kind field when printing SubLevelTag!\n");
     exit(1);
   }
 }
@@ -469,10 +363,10 @@ void ppIdent(String s, int i)
   renderS(s);
 }
 
-void ppIdent(String s, int i)
+/* void ppIdent(String s, int i)
 {
   renderS(s);
-}
+} */
 
 
 void shSourceFile(SourceFile p)
@@ -486,7 +380,7 @@ void shSourceFile(SourceFile p)
 
     bufAppendC(' ');
 
-    shFile(p->u.mainFile_.file_);
+    shListTopLevelTag(p->u.mainFile_.listtopleveltag_);
 
     bufAppendC(')');
 
@@ -498,275 +392,116 @@ void shSourceFile(SourceFile p)
   }
 }
 
-void shFile(File p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleFile:
-    bufAppendC('(');
-
-    bufAppendS("SimpleFile");
-
-    bufAppendC(' ');
-
-    shListSectionDecl(p->u.simpleFile_.listsectiondecl_);
-
-    bufAppendC(')');
-
-    break;
-  case is_FileWImport:
-    bufAppendC('(');
-
-    bufAppendS("FileWImport");
-
-    bufAppendC(' ');
-
-    shListImport(p->u.fileWImport_.listimport_);
-  bufAppendC(' ');
-    shListSectionDecl(p->u.fileWImport_.listsectiondecl_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing File!\n");
-    exit(1);
-  }
-}
-
-void shListSectionDecl(ListSectionDecl listsectiondecl)
+void shListTopLevelTag(ListTopLevelTag listtopleveltag)
 {
   bufAppendC('[');
-  while(listsectiondecl != 0)
+  while(listtopleveltag != 0)
   {
-    if (listsectiondecl->listsectiondecl_)
+    if (listtopleveltag->listtopleveltag_)
     {
-      shSectionDecl(listsectiondecl->sectiondecl_);
+      shTopLevelTag(listtopleveltag->topleveltag_);
       bufAppendS(", ");
-      listsectiondecl = listsectiondecl->listsectiondecl_;
+      listtopleveltag = listtopleveltag->listtopleveltag_;
     }
     else
     {
-      shSectionDecl(listsectiondecl->sectiondecl_);
-      listsectiondecl = 0;
+      shTopLevelTag(listtopleveltag->topleveltag_);
+      listtopleveltag = 0;
     }
   }
   bufAppendC(']');
 }
 
-void shListImport(ListImport listimport)
+void shTopLevelTag(TopLevelTag p)
+{
+  switch(p->kind)
+  {
+  case is_FileImportTag:
+    bufAppendC('(');
+
+    bufAppendS("FileImportTag");
+
+    bufAppendC(' ');
+
+    shString(p->u.fileImportTag_.string_);
+
+    bufAppendC(')');
+
+    break;
+  case is_SectionTag:
+    bufAppendC('(');
+
+    bufAppendS("SectionTag");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.sectionTag_.ident_);
+  bufAppendC(' ');
+    shListSubLevelTag(p->u.sectionTag_.listsubleveltag_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing TopLevelTag!\n");
+    exit(1);
+  }
+}
+
+void shListSubLevelTag(ListSubLevelTag listsubleveltag)
 {
   bufAppendC('[');
-  while(listimport != 0)
+  while(listsubleveltag != 0)
   {
-    if (listimport->listimport_)
+    if (listsubleveltag->listsubleveltag_)
     {
-      shImport(listimport->import_);
+      shSubLevelTag(listsubleveltag->subleveltag_);
       bufAppendS(", ");
-      listimport = listimport->listimport_;
+      listsubleveltag = listsubleveltag->listsubleveltag_;
     }
     else
     {
-      shImport(listimport->import_);
-      listimport = 0;
+      shSubLevelTag(listsubleveltag->subleveltag_);
+      listsubleveltag = 0;
     }
   }
   bufAppendC(']');
 }
 
-void shImport(Import p)
+void shSubLevelTag(SubLevelTag p)
 {
   switch(p->kind)
   {
-  case is_FileImport:
+  case is_FieldTag:
     bufAppendC('(');
 
-    bufAppendS("FileImport");
+    bufAppendS("FieldTag");
 
     bufAppendC(' ');
 
-    shFilePath(p->u.fileImport_.filepath_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing Import!\n");
-    exit(1);
-  }
-}
-
-void shFilePath(FilePath p)
-{
-  switch(p->kind)
-  {
-  case is_Path:
-    bufAppendC('(');
-
-    bufAppendS("Path");
-
-    bufAppendC(' ');
-
-    shString(p->u.path_.string_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing FilePath!\n");
-    exit(1);
-  }
-}
-
-void shSectionDecl(SectionDecl p)
-{
-  switch(p->kind)
-  {
-  case is_SecDecl:
-    bufAppendC('(');
-
-    bufAppendS("SecDecl");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.secDecl_.ident_);
+    shIdent(p->u.fieldTag_.ident_);
   bufAppendC(' ');
-    shSectionContent(p->u.secDecl_.sectioncontent_);
+    shValue(p->u.fieldTag_.value_);
+
+    bufAppendC(')');
+
+    break;
+  case is_InheritTag:
+    bufAppendC('(');
+
+    bufAppendS("InheritTag");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.inheritTag_.ident_);
 
     bufAppendC(')');
 
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when showing SectionDecl!\n");
-    exit(1);
-  }
-}
-
-void shSectionContent(SectionContent p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleSecCont:
-    bufAppendC('(');
-
-    bufAppendS("SimpleSecCont");
-
-    bufAppendC(' ');
-
-    shListFieldDecl(p->u.simpleSecCont_.listfielddecl_);
-
-    bufAppendC(')');
-
-    break;
-  case is_SecContent:
-    bufAppendC('(');
-
-    bufAppendS("SecContent");
-
-    bufAppendC(' ');
-
-    shListInherit(p->u.secContent_.listinherit_);
-  bufAppendC(' ');
-    shListFieldDecl(p->u.secContent_.listfielddecl_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing SectionContent!\n");
-    exit(1);
-  }
-}
-
-void shListFieldDecl(ListFieldDecl listfielddecl)
-{
-  bufAppendC('[');
-  while(listfielddecl != 0)
-  {
-    if (listfielddecl->listfielddecl_)
-    {
-      shFieldDecl(listfielddecl->fielddecl_);
-      bufAppendS(", ");
-      listfielddecl = listfielddecl->listfielddecl_;
-    }
-    else
-    {
-      shFieldDecl(listfielddecl->fielddecl_);
-      listfielddecl = 0;
-    }
-  }
-  bufAppendC(']');
-}
-
-void shListInherit(ListInherit listinherit)
-{
-  bufAppendC('[');
-  while(listinherit != 0)
-  {
-    if (listinherit->listinherit_)
-    {
-      shInherit(listinherit->inherit_);
-      bufAppendS(", ");
-      listinherit = listinherit->listinherit_;
-    }
-    else
-    {
-      shInherit(listinherit->inherit_);
-      listinherit = 0;
-    }
-  }
-  bufAppendC(']');
-}
-
-void shInherit(Inherit p)
-{
-  switch(p->kind)
-  {
-  case is_InheritSection:
-    bufAppendC('(');
-
-    bufAppendS("InheritSection");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.inheritSection_.ident_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing Inherit!\n");
-    exit(1);
-  }
-}
-
-void shFieldDecl(FieldDecl p)
-{
-  switch(p->kind)
-  {
-  case is_FieldDeclar:
-    bufAppendC('(');
-
-    bufAppendS("FieldDeclar");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.fieldDeclar_.ident_);
-  bufAppendC(' ');
-    shValue(p->u.fieldDeclar_.value_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing FieldDecl!\n");
+    fprintf(stderr, "Error: bad kind field when showing SubLevelTag!\n");
     exit(1);
   }
 }
@@ -925,12 +660,12 @@ void shIdent(String s)
   bufAppendC('\"');
 }
 
-void shIdent(String s)
+/* void shIdent(String s)
 {
   bufAppendC('\"');
   bufEscapeS(s);
   bufAppendC('\"');
-}
+} */
 
 
 void bufEscapeS(const char *s)

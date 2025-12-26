@@ -2,30 +2,15 @@ entrypoints SourceFile ;
 comment "#" ;
 
 -- File principale
-MainFile.       SourceFile ::= File ;     
-SimpleFile.     File ::= [SectionDecl] ;
-FileWImport.    File ::= [Import] [SectionDecl] ;
-separator SectionDecl ""; 
-separator Import ""; 
+MainFile.       SourceFile ::= [TopLevelTag] ;
+separator TopLevelTag "" ;
 
--- Import
-FileImport.     Import ::= "<" "import" ">" FilePath "<" "/" "import" ">" ;
-Path.           FilePath ::= String ;
+FileImportTag.  TopLevelTag ::= "<" "import" ">" String "<" "/" "import" ">" ;
+SectionTag.     TopLevelTag ::= "<" "section" "name" "=" Ident ">" [SubLevelTag] "<" "/" "section" ">" ;
+separator SubLevelTag ""; 
 
--- Sezioni
-SecDecl.        SectionDecl ::= "<" "section" "name" "=" Ident ">" SectionContent "<" "/" "section" ">" ;
-
--- Contenuto sezione
-SimpleSecCont.  SectionContent ::= [FieldDecl] ;
-SecContent.     SectionContent ::= [Inherit] [FieldDecl] ;
-separator FieldDecl ""; 
-separator Inherit ""; 
-
--- Eredità
-InheritSection. Inherit ::= "<" "inherit" ">" Ident "<" "/" "inherit" ">" ;
-
--- Campi
-FieldDeclar.    FieldDecl ::= "<" "field" "name" "=" Ident ">" Value "<" "/" "field" ">" ;
+FieldTag.       SubLevelTag ::= "<" "field" "name" "=" Ident ">" Value "<" "/" "field" ">" ; 
+InheritTag.     SubLevelTag ::= "<" "inherit" ">" Ident "<" "/" "inherit" ">" ;
 
 -- Valori
 ValueInt.       Value ::= Integer ;

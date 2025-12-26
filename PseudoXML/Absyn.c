@@ -8,7 +8,7 @@
 
 /********************   MainFile    ********************/
 
-SourceFile make_MainFile(File p1)
+SourceFile make_MainFile(ListTopLevelTag p1)
 {
     SourceFile tmp = (SourceFile) malloc(sizeof(*tmp));
     if (!tmp)
@@ -17,206 +17,99 @@ SourceFile make_MainFile(File p1)
         exit(1);
     }
     tmp->kind = is_MainFile;
-    tmp->u.mainFile_.file_ = p1;
+    tmp->u.mainFile_.listtopleveltag_ = p1;
     return tmp;
 }
 
-/********************   SimpleFile    ********************/
+/********************   ListTopLevelTag    ********************/
 
-File make_SimpleFile(ListSectionDecl p1)
+ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2)
 {
-    File tmp = (File) malloc(sizeof(*tmp));
+    ListTopLevelTag tmp = (ListTopLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating SimpleFile!\n");
+        fprintf(stderr, "Error: out of memory when allocating ListTopLevelTag!\n");
         exit(1);
     }
-    tmp->kind = is_SimpleFile;
-    tmp->u.simpleFile_.listsectiondecl_ = p1;
+    tmp->topleveltag_ = p1;
+    tmp->listtopleveltag_ = p2;
     return tmp;
 }
 
-/********************   FileWImport    ********************/
+/********************   FileImportTag    ********************/
 
-File make_FileWImport(ListImport p1, ListSectionDecl p2)
+TopLevelTag make_FileImportTag(String p1)
 {
-    File tmp = (File) malloc(sizeof(*tmp));
+    TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating FileWImport!\n");
+        fprintf(stderr, "Error: out of memory when allocating FileImportTag!\n");
         exit(1);
     }
-    tmp->kind = is_FileWImport;
-    tmp->u.fileWImport_.listimport_ = p1;
-    tmp->u.fileWImport_.listsectiondecl_ = p2;
+    tmp->kind = is_FileImportTag;
+    tmp->u.fileImportTag_.string_ = p1;
     return tmp;
 }
 
-/********************   ListSectionDecl    ********************/
+/********************   SectionTag    ********************/
 
-ListSectionDecl make_ListSectionDecl(SectionDecl p1, ListSectionDecl p2)
+TopLevelTag make_SectionTag(Ident p1, ListSubLevelTag p2)
 {
-    ListSectionDecl tmp = (ListSectionDecl) malloc(sizeof(*tmp));
+    TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ListSectionDecl!\n");
+        fprintf(stderr, "Error: out of memory when allocating SectionTag!\n");
         exit(1);
     }
-    tmp->sectiondecl_ = p1;
-    tmp->listsectiondecl_ = p2;
+    tmp->kind = is_SectionTag;
+    tmp->u.sectionTag_.ident_ = p1;
+    tmp->u.sectionTag_.listsubleveltag_ = p2;
     return tmp;
 }
 
-/********************   ListImport    ********************/
+/********************   ListSubLevelTag    ********************/
 
-ListImport make_ListImport(Import p1, ListImport p2)
+ListSubLevelTag make_ListSubLevelTag(SubLevelTag p1, ListSubLevelTag p2)
 {
-    ListImport tmp = (ListImport) malloc(sizeof(*tmp));
+    ListSubLevelTag tmp = (ListSubLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ListImport!\n");
+        fprintf(stderr, "Error: out of memory when allocating ListSubLevelTag!\n");
         exit(1);
     }
-    tmp->import_ = p1;
-    tmp->listimport_ = p2;
+    tmp->subleveltag_ = p1;
+    tmp->listsubleveltag_ = p2;
     return tmp;
 }
 
-/********************   FileImport    ********************/
+/********************   FieldTag    ********************/
 
-Import make_FileImport(FilePath p1)
+SubLevelTag make_FieldTag(Ident p1, Value p2)
 {
-    Import tmp = (Import) malloc(sizeof(*tmp));
+    SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating FileImport!\n");
+        fprintf(stderr, "Error: out of memory when allocating FieldTag!\n");
         exit(1);
     }
-    tmp->kind = is_FileImport;
-    tmp->u.fileImport_.filepath_ = p1;
+    tmp->kind = is_FieldTag;
+    tmp->u.fieldTag_.ident_ = p1;
+    tmp->u.fieldTag_.value_ = p2;
     return tmp;
 }
 
-/********************   Path    ********************/
+/********************   InheritTag    ********************/
 
-FilePath make_Path(String p1)
+SubLevelTag make_InheritTag(Ident p1)
 {
-    FilePath tmp = (FilePath) malloc(sizeof(*tmp));
+    SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating Path!\n");
+        fprintf(stderr, "Error: out of memory when allocating InheritTag!\n");
         exit(1);
     }
-    tmp->kind = is_Path;
-    tmp->u.path_.string_ = p1;
-    return tmp;
-}
-
-/********************   SecDecl    ********************/
-
-SectionDecl make_SecDecl(Ident p1, SectionContent p2)
-{
-    SectionDecl tmp = (SectionDecl) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating SecDecl!\n");
-        exit(1);
-    }
-    tmp->kind = is_SecDecl;
-    tmp->u.secDecl_.ident_ = p1;
-    tmp->u.secDecl_.sectioncontent_ = p2;
-    return tmp;
-}
-
-/********************   SimpleSecCont    ********************/
-
-SectionContent make_SimpleSecCont(ListFieldDecl p1)
-{
-    SectionContent tmp = (SectionContent) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating SimpleSecCont!\n");
-        exit(1);
-    }
-    tmp->kind = is_SimpleSecCont;
-    tmp->u.simpleSecCont_.listfielddecl_ = p1;
-    return tmp;
-}
-
-/********************   SecContent    ********************/
-
-SectionContent make_SecContent(ListInherit p1, ListFieldDecl p2)
-{
-    SectionContent tmp = (SectionContent) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating SecContent!\n");
-        exit(1);
-    }
-    tmp->kind = is_SecContent;
-    tmp->u.secContent_.listinherit_ = p1;
-    tmp->u.secContent_.listfielddecl_ = p2;
-    return tmp;
-}
-
-/********************   ListFieldDecl    ********************/
-
-ListFieldDecl make_ListFieldDecl(FieldDecl p1, ListFieldDecl p2)
-{
-    ListFieldDecl tmp = (ListFieldDecl) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ListFieldDecl!\n");
-        exit(1);
-    }
-    tmp->fielddecl_ = p1;
-    tmp->listfielddecl_ = p2;
-    return tmp;
-}
-
-/********************   ListInherit    ********************/
-
-ListInherit make_ListInherit(Inherit p1, ListInherit p2)
-{
-    ListInherit tmp = (ListInherit) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ListInherit!\n");
-        exit(1);
-    }
-    tmp->inherit_ = p1;
-    tmp->listinherit_ = p2;
-    return tmp;
-}
-
-/********************   InheritSection    ********************/
-
-Inherit make_InheritSection(Ident p1)
-{
-    Inherit tmp = (Inherit) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating InheritSection!\n");
-        exit(1);
-    }
-    tmp->kind = is_InheritSection;
-    tmp->u.inheritSection_.ident_ = p1;
-    return tmp;
-}
-
-/********************   FieldDeclar    ********************/
-
-FieldDecl make_FieldDeclar(Ident p1, Value p2)
-{
-    FieldDecl tmp = (FieldDecl) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating FieldDeclar!\n");
-        exit(1);
-    }
-    tmp->kind = is_FieldDeclar;
-    tmp->u.fieldDeclar_.ident_ = p1;
-    tmp->u.fieldDeclar_.value_ = p2;
+    tmp->kind = is_InheritTag;
+    tmp->u.inheritTag_.ident_ = p1;
     return tmp;
 }
 
@@ -346,7 +239,7 @@ SourceFile clone_SourceFile(SourceFile p)
   switch(p->kind)
   {
   case is_MainFile:
-    return make_MainFile (clone_File(p->u.mainFile_.file_));
+    return make_MainFile (clone_ListTopLevelTag(p->u.mainFile_.listtopleveltag_));
 
   default:
     fprintf(stderr, "Error: bad kind field when cloning SourceFile!\n");
@@ -354,163 +247,66 @@ SourceFile clone_SourceFile(SourceFile p)
   }
 }
 
-File clone_File(File p)
+ListTopLevelTag clone_ListTopLevelTag(ListTopLevelTag listtopleveltag)
 {
-  switch(p->kind)
-  {
-  case is_SimpleFile:
-    return make_SimpleFile (clone_ListSectionDecl(p->u.simpleFile_.listsectiondecl_));
-
-  case is_FileWImport:
-    return make_FileWImport
-      ( clone_ListImport(p->u.fileWImport_.listimport_)
-      , clone_ListSectionDecl(p->u.fileWImport_.listsectiondecl_)
-      );
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning File!\n");
-    exit(1);
-  }
-}
-
-ListSectionDecl clone_ListSectionDecl(ListSectionDecl listsectiondecl)
-{
-  if (listsectiondecl)
+  if (listtopleveltag)
   {
     /* clone of non-empty list */
-    return make_ListSectionDecl
-      ( clone_SectionDecl(listsectiondecl->sectiondecl_)
-      , clone_ListSectionDecl(listsectiondecl->listsectiondecl_)
+    return make_ListTopLevelTag
+      ( clone_TopLevelTag(listtopleveltag->topleveltag_)
+      , clone_ListTopLevelTag(listtopleveltag->listtopleveltag_)
       );
   }
   else return NULL; /* clone of empty list */
 }
 
-ListImport clone_ListImport(ListImport listimport)
+TopLevelTag clone_TopLevelTag(TopLevelTag p)
 {
-  if (listimport)
+  switch(p->kind)
+  {
+  case is_FileImportTag:
+    return make_FileImportTag (strdup(p->u.fileImportTag_.string_));
+
+  case is_SectionTag:
+    return make_SectionTag
+      ( strdup(p->u.sectionTag_.ident_)
+      , clone_ListSubLevelTag(p->u.sectionTag_.listsubleveltag_)
+      );
+
+  default:
+    fprintf(stderr, "Error: bad kind field when cloning TopLevelTag!\n");
+    exit(1);
+  }
+}
+
+ListSubLevelTag clone_ListSubLevelTag(ListSubLevelTag listsubleveltag)
+{
+  if (listsubleveltag)
   {
     /* clone of non-empty list */
-    return make_ListImport
-      ( clone_Import(listimport->import_)
-      , clone_ListImport(listimport->listimport_)
+    return make_ListSubLevelTag
+      ( clone_SubLevelTag(listsubleveltag->subleveltag_)
+      , clone_ListSubLevelTag(listsubleveltag->listsubleveltag_)
       );
   }
   else return NULL; /* clone of empty list */
 }
 
-Import clone_Import(Import p)
+SubLevelTag clone_SubLevelTag(SubLevelTag p)
 {
   switch(p->kind)
   {
-  case is_FileImport:
-    return make_FileImport (clone_FilePath(p->u.fileImport_.filepath_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning Import!\n");
-    exit(1);
-  }
-}
-
-FilePath clone_FilePath(FilePath p)
-{
-  switch(p->kind)
-  {
-  case is_Path:
-    return make_Path (strdup(p->u.path_.string_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning FilePath!\n");
-    exit(1);
-  }
-}
-
-SectionDecl clone_SectionDecl(SectionDecl p)
-{
-  switch(p->kind)
-  {
-  case is_SecDecl:
-    return make_SecDecl
-      ( strdup(p->u.secDecl_.ident_)
-      , clone_SectionContent(p->u.secDecl_.sectioncontent_)
+  case is_FieldTag:
+    return make_FieldTag
+      ( strdup(p->u.fieldTag_.ident_)
+      , clone_Value(p->u.fieldTag_.value_)
       );
 
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning SectionDecl!\n");
-    exit(1);
-  }
-}
-
-SectionContent clone_SectionContent(SectionContent p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleSecCont:
-    return make_SimpleSecCont (clone_ListFieldDecl(p->u.simpleSecCont_.listfielddecl_));
-
-  case is_SecContent:
-    return make_SecContent
-      ( clone_ListInherit(p->u.secContent_.listinherit_)
-      , clone_ListFieldDecl(p->u.secContent_.listfielddecl_)
-      );
+  case is_InheritTag:
+    return make_InheritTag (strdup(p->u.inheritTag_.ident_));
 
   default:
-    fprintf(stderr, "Error: bad kind field when cloning SectionContent!\n");
-    exit(1);
-  }
-}
-
-ListFieldDecl clone_ListFieldDecl(ListFieldDecl listfielddecl)
-{
-  if (listfielddecl)
-  {
-    /* clone of non-empty list */
-    return make_ListFieldDecl
-      ( clone_FieldDecl(listfielddecl->fielddecl_)
-      , clone_ListFieldDecl(listfielddecl->listfielddecl_)
-      );
-  }
-  else return NULL; /* clone of empty list */
-}
-
-ListInherit clone_ListInherit(ListInherit listinherit)
-{
-  if (listinherit)
-  {
-    /* clone of non-empty list */
-    return make_ListInherit
-      ( clone_Inherit(listinherit->inherit_)
-      , clone_ListInherit(listinherit->listinherit_)
-      );
-  }
-  else return NULL; /* clone of empty list */
-}
-
-Inherit clone_Inherit(Inherit p)
-{
-  switch(p->kind)
-  {
-  case is_InheritSection:
-    return make_InheritSection (strdup(p->u.inheritSection_.ident_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning Inherit!\n");
-    exit(1);
-  }
-}
-
-FieldDecl clone_FieldDecl(FieldDecl p)
-{
-  switch(p->kind)
-  {
-  case is_FieldDeclar:
-    return make_FieldDeclar
-      ( strdup(p->u.fieldDeclar_.ident_)
-      , clone_Value(p->u.fieldDeclar_.value_)
-      );
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning FieldDecl!\n");
+    fprintf(stderr, "Error: bad kind field when cloning SubLevelTag!\n");
     exit(1);
   }
 }
@@ -587,7 +383,7 @@ void free_SourceFile(SourceFile p)
   switch(p->kind)
   {
   case is_MainFile:
-    free_File(p->u.mainFile_.file_);
+    free_ListTopLevelTag(p->u.mainFile_.listtopleveltag_);
     break;
 
   default:
@@ -597,158 +393,61 @@ void free_SourceFile(SourceFile p)
   free(p);
 }
 
-void free_File(File p)
+void free_ListTopLevelTag(ListTopLevelTag listtopleveltag)
+{
+  if (listtopleveltag)
+  {
+    free_TopLevelTag(listtopleveltag->topleveltag_);
+    free_ListTopLevelTag(listtopleveltag->listtopleveltag_);
+    free(listtopleveltag);
+  }
+}
+
+void free_TopLevelTag(TopLevelTag p)
 {
   switch(p->kind)
   {
-  case is_SimpleFile:
-    free_ListSectionDecl(p->u.simpleFile_.listsectiondecl_);
+  case is_FileImportTag:
+    free(p->u.fileImportTag_.string_);
     break;
 
-  case is_FileWImport:
-    free_ListImport(p->u.fileWImport_.listimport_);
-    free_ListSectionDecl(p->u.fileWImport_.listsectiondecl_);
+  case is_SectionTag:
+    free(p->u.sectionTag_.ident_);
+    free_ListSubLevelTag(p->u.sectionTag_.listsubleveltag_);
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when freeing File!\n");
+    fprintf(stderr, "Error: bad kind field when freeing TopLevelTag!\n");
     exit(1);
   }
   free(p);
 }
 
-void free_ListSectionDecl(ListSectionDecl listsectiondecl)
+void free_ListSubLevelTag(ListSubLevelTag listsubleveltag)
 {
-  if (listsectiondecl)
+  if (listsubleveltag)
   {
-    free_SectionDecl(listsectiondecl->sectiondecl_);
-    free_ListSectionDecl(listsectiondecl->listsectiondecl_);
-    free(listsectiondecl);
+    free_SubLevelTag(listsubleveltag->subleveltag_);
+    free_ListSubLevelTag(listsubleveltag->listsubleveltag_);
+    free(listsubleveltag);
   }
 }
 
-void free_ListImport(ListImport listimport)
-{
-  if (listimport)
-  {
-    free_Import(listimport->import_);
-    free_ListImport(listimport->listimport_);
-    free(listimport);
-  }
-}
-
-void free_Import(Import p)
+void free_SubLevelTag(SubLevelTag p)
 {
   switch(p->kind)
   {
-  case is_FileImport:
-    free_FilePath(p->u.fileImport_.filepath_);
+  case is_FieldTag:
+    free(p->u.fieldTag_.ident_);
+    free_Value(p->u.fieldTag_.value_);
+    break;
+
+  case is_InheritTag:
+    free(p->u.inheritTag_.ident_);
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when freeing Import!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_FilePath(FilePath p)
-{
-  switch(p->kind)
-  {
-  case is_Path:
-    free(p->u.path_.string_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing FilePath!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_SectionDecl(SectionDecl p)
-{
-  switch(p->kind)
-  {
-  case is_SecDecl:
-    free(p->u.secDecl_.ident_);
-    free_SectionContent(p->u.secDecl_.sectioncontent_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing SectionDecl!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_SectionContent(SectionContent p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleSecCont:
-    free_ListFieldDecl(p->u.simpleSecCont_.listfielddecl_);
-    break;
-
-  case is_SecContent:
-    free_ListInherit(p->u.secContent_.listinherit_);
-    free_ListFieldDecl(p->u.secContent_.listfielddecl_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing SectionContent!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_ListFieldDecl(ListFieldDecl listfielddecl)
-{
-  if (listfielddecl)
-  {
-    free_FieldDecl(listfielddecl->fielddecl_);
-    free_ListFieldDecl(listfielddecl->listfielddecl_);
-    free(listfielddecl);
-  }
-}
-
-void free_ListInherit(ListInherit listinherit)
-{
-  if (listinherit)
-  {
-    free_Inherit(listinherit->inherit_);
-    free_ListInherit(listinherit->listinherit_);
-    free(listinherit);
-  }
-}
-
-void free_Inherit(Inherit p)
-{
-  switch(p->kind)
-  {
-  case is_InheritSection:
-    free(p->u.inheritSection_.ident_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing Inherit!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_FieldDecl(FieldDecl p)
-{
-  switch(p->kind)
-  {
-  case is_FieldDeclar:
-    free(p->u.fieldDeclar_.ident_);
-    free_Value(p->u.fieldDeclar_.value_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing FieldDecl!\n");
+    fprintf(stderr, "Error: bad kind field when freeing SubLevelTag!\n");
     exit(1);
   }
   free(p);

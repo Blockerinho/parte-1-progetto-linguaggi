@@ -27,38 +27,17 @@ typedef char* Ident;
 struct SourceFile_;
 typedef struct SourceFile_ *SourceFile;
 
-struct File_;
-typedef struct File_ *File;
+struct ListTopLevelTag_;
+typedef struct ListTopLevelTag_ *ListTopLevelTag;
 
-struct ListSectionDecl_;
-typedef struct ListSectionDecl_ *ListSectionDecl;
+struct TopLevelTag_;
+typedef struct TopLevelTag_ *TopLevelTag;
 
-struct ListImport_;
-typedef struct ListImport_ *ListImport;
+struct ListSubLevelTag_;
+typedef struct ListSubLevelTag_ *ListSubLevelTag;
 
-struct Import_;
-typedef struct Import_ *Import;
-
-struct FilePath_;
-typedef struct FilePath_ *FilePath;
-
-struct SectionDecl_;
-typedef struct SectionDecl_ *SectionDecl;
-
-struct SectionContent_;
-typedef struct SectionContent_ *SectionContent;
-
-struct ListFieldDecl_;
-typedef struct ListFieldDecl_ *ListFieldDecl;
-
-struct ListInherit_;
-typedef struct ListInherit_ *ListInherit;
-
-struct Inherit_;
-typedef struct Inherit_ *Inherit;
-
-struct FieldDecl_;
-typedef struct FieldDecl_ *FieldDecl;
+struct SubLevelTag_;
+typedef struct SubLevelTag_ *SubLevelTag;
 
 struct Value_;
 typedef struct Value_ *Value;
@@ -76,124 +55,53 @@ struct SourceFile_
   enum { is_MainFile } kind;
   union
   {
-    struct { File file_; } mainFile_;
+    struct { ListTopLevelTag listtopleveltag_; } mainFile_;
   } u;
 };
 
-SourceFile make_MainFile(File p0);
+SourceFile make_MainFile(ListTopLevelTag p0);
 
-struct File_
+struct ListTopLevelTag_
 {
-  enum { is_SimpleFile, is_FileWImport } kind;
+  TopLevelTag topleveltag_;
+  ListTopLevelTag listtopleveltag_;
+};
+
+ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2);
+
+struct TopLevelTag_
+{
+  enum { is_FileImportTag, is_SectionTag } kind;
   union
   {
-    struct { ListSectionDecl listsectiondecl_; } simpleFile_;
-    struct { ListImport listimport_; ListSectionDecl listsectiondecl_; } fileWImport_;
+    struct { String string_; } fileImportTag_;
+    struct { Ident ident_; ListSubLevelTag listsubleveltag_; } sectionTag_;
   } u;
 };
 
-File make_SimpleFile(ListSectionDecl p0);
-File make_FileWImport(ListImport p0, ListSectionDecl p1);
+TopLevelTag make_FileImportTag(String p0);
+TopLevelTag make_SectionTag(Ident p0, ListSubLevelTag p1);
 
-struct ListSectionDecl_
+struct ListSubLevelTag_
 {
-  SectionDecl sectiondecl_;
-  ListSectionDecl listsectiondecl_;
+  SubLevelTag subleveltag_;
+  ListSubLevelTag listsubleveltag_;
 };
 
-ListSectionDecl make_ListSectionDecl(SectionDecl p1, ListSectionDecl p2);
+ListSubLevelTag make_ListSubLevelTag(SubLevelTag p1, ListSubLevelTag p2);
 
-struct ListImport_
+struct SubLevelTag_
 {
-  Import import_;
-  ListImport listimport_;
-};
-
-ListImport make_ListImport(Import p1, ListImport p2);
-
-struct Import_
-{
-  enum { is_FileImport } kind;
+  enum { is_FieldTag, is_InheritTag } kind;
   union
   {
-    struct { FilePath filepath_; } fileImport_;
+    struct { Ident ident_; Value value_; } fieldTag_;
+    struct { Ident ident_; } inheritTag_;
   } u;
 };
 
-Import make_FileImport(FilePath p0);
-
-struct FilePath_
-{
-  enum { is_Path } kind;
-  union
-  {
-    struct { String string_; } path_;
-  } u;
-};
-
-FilePath make_Path(String p0);
-
-struct SectionDecl_
-{
-  enum { is_SecDecl } kind;
-  union
-  {
-    struct { Ident ident_; SectionContent sectioncontent_; } secDecl_;
-  } u;
-};
-
-SectionDecl make_SecDecl(Ident p0, SectionContent p1);
-
-struct SectionContent_
-{
-  enum { is_SimpleSecCont, is_SecContent } kind;
-  union
-  {
-    struct { ListFieldDecl listfielddecl_; } simpleSecCont_;
-    struct { ListFieldDecl listfielddecl_; ListInherit listinherit_; } secContent_;
-  } u;
-};
-
-SectionContent make_SimpleSecCont(ListFieldDecl p0);
-SectionContent make_SecContent(ListInherit p0, ListFieldDecl p1);
-
-struct ListFieldDecl_
-{
-  FieldDecl fielddecl_;
-  ListFieldDecl listfielddecl_;
-};
-
-ListFieldDecl make_ListFieldDecl(FieldDecl p1, ListFieldDecl p2);
-
-struct ListInherit_
-{
-  Inherit inherit_;
-  ListInherit listinherit_;
-};
-
-ListInherit make_ListInherit(Inherit p1, ListInherit p2);
-
-struct Inherit_
-{
-  enum { is_InheritSection } kind;
-  union
-  {
-    struct { Ident ident_; } inheritSection_;
-  } u;
-};
-
-Inherit make_InheritSection(Ident p0);
-
-struct FieldDecl_
-{
-  enum { is_FieldDeclar } kind;
-  union
-  {
-    struct { Ident ident_; Value value_; } fieldDeclar_;
-  } u;
-};
-
-FieldDecl make_FieldDeclar(Ident p0, Value p1);
+SubLevelTag make_FieldTag(Ident p0, Value p1);
+SubLevelTag make_InheritTag(Ident p0);
 
 struct Value_
 {
@@ -239,17 +147,10 @@ NonLocVar make_NonLoc(Ident p0, Ident p1);
 /***************************   Cloning   ******************************/
 
 SourceFile clone_SourceFile(SourceFile p);
-File clone_File(File p);
-ListSectionDecl clone_ListSectionDecl(ListSectionDecl p);
-ListImport clone_ListImport(ListImport p);
-Import clone_Import(Import p);
-FilePath clone_FilePath(FilePath p);
-SectionDecl clone_SectionDecl(SectionDecl p);
-SectionContent clone_SectionContent(SectionContent p);
-ListFieldDecl clone_ListFieldDecl(ListFieldDecl p);
-ListInherit clone_ListInherit(ListInherit p);
-Inherit clone_Inherit(Inherit p);
-FieldDecl clone_FieldDecl(FieldDecl p);
+ListTopLevelTag clone_ListTopLevelTag(ListTopLevelTag p);
+TopLevelTag clone_TopLevelTag(TopLevelTag p);
+ListSubLevelTag clone_ListSubLevelTag(ListSubLevelTag p);
+SubLevelTag clone_SubLevelTag(SubLevelTag p);
 Value clone_Value(Value p);
 Boolean clone_Boolean(Boolean p);
 NonLocVar clone_NonLocVar(NonLocVar p);
@@ -265,17 +166,10 @@ NonLocVar clone_NonLocVar(NonLocVar p);
  */
 
 void free_SourceFile(SourceFile p);
-void free_File(File p);
-void free_ListSectionDecl(ListSectionDecl p);
-void free_ListImport(ListImport p);
-void free_Import(Import p);
-void free_FilePath(FilePath p);
-void free_SectionDecl(SectionDecl p);
-void free_SectionContent(SectionContent p);
-void free_ListFieldDecl(ListFieldDecl p);
-void free_ListInherit(ListInherit p);
-void free_Inherit(Inherit p);
-void free_FieldDecl(FieldDecl p);
+void free_ListTopLevelTag(ListTopLevelTag p);
+void free_TopLevelTag(TopLevelTag p);
+void free_ListSubLevelTag(ListSubLevelTag p);
+void free_SubLevelTag(SubLevelTag p);
 void free_Value(Value p);
 void free_Boolean(Boolean p);
 void free_NonLocVar(NonLocVar p);

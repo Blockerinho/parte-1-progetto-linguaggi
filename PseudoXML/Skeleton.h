@@ -8,17 +8,10 @@
 
 
 void visitSourceFile(SourceFile p);
-void visitFile(File p);
-void visitListSectionDecl(ListSectionDecl p);
-void visitListImport(ListImport p);
-void visitImport(Import p);
-void visitFilePath(FilePath p);
-void visitSectionDecl(SectionDecl p);
-void visitSectionContent(SectionContent p);
-void visitListFieldDecl(ListFieldDecl p);
-void visitListInherit(ListInherit p);
-void visitInherit(Inherit p);
-void visitFieldDecl(FieldDecl p);
+void visitListTopLevelTag(ListTopLevelTag p);
+void visitTopLevelTag(TopLevelTag p);
+void visitListSubLevelTag(ListSubLevelTag p);
+void visitSubLevelTag(SubLevelTag p);
 void visitValue(Value p);
 void visitBoolean(Boolean p);
 void visitNonLocVar(NonLocVar p);

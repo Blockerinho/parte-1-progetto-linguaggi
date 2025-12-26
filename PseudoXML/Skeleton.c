@@ -16,7 +16,7 @@ void visitSourceFile(SourceFile p)
   {
   case is_MainFile:
     /* Code for MainFile Goes Here */
-    visitFile(p->u.mainFile_.file_);
+    visitListTopLevelTag(p->u.mainFile_.listtopleveltag_);
     break;
 
   default:
@@ -25,159 +25,62 @@ void visitSourceFile(SourceFile p)
   }
 }
 
-void visitFile(File p)
+void visitListTopLevelTag(ListTopLevelTag listtopleveltag)
+{
+  while(listtopleveltag  != 0)
+  {
+    /* Code For ListTopLevelTag Goes Here */
+    visitTopLevelTag(listtopleveltag->topleveltag_);
+    listtopleveltag = listtopleveltag->listtopleveltag_;
+  }
+}
+
+void visitTopLevelTag(TopLevelTag p)
 {
   switch(p->kind)
   {
-  case is_SimpleFile:
-    /* Code for SimpleFile Goes Here */
-    visitListSectionDecl(p->u.simpleFile_.listsectiondecl_);
+  case is_FileImportTag:
+    /* Code for FileImportTag Goes Here */
+    visitString(p->u.fileImportTag_.string_);
     break;
-  case is_FileWImport:
-    /* Code for FileWImport Goes Here */
-    visitListImport(p->u.fileWImport_.listimport_);
-    visitListSectionDecl(p->u.fileWImport_.listsectiondecl_);
+  case is_SectionTag:
+    /* Code for SectionTag Goes Here */
+    visitIdent(p->u.sectionTag_.ident_);
+    visitListSubLevelTag(p->u.sectionTag_.listsubleveltag_);
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when printing File!\n");
+    fprintf(stderr, "Error: bad kind field when printing TopLevelTag!\n");
     exit(1);
   }
 }
 
-void visitListSectionDecl(ListSectionDecl listsectiondecl)
+void visitListSubLevelTag(ListSubLevelTag listsubleveltag)
 {
-  while(listsectiondecl  != 0)
+  while(listsubleveltag  != 0)
   {
-    /* Code For ListSectionDecl Goes Here */
-    visitSectionDecl(listsectiondecl->sectiondecl_);
-    listsectiondecl = listsectiondecl->listsectiondecl_;
+    /* Code For ListSubLevelTag Goes Here */
+    visitSubLevelTag(listsubleveltag->subleveltag_);
+    listsubleveltag = listsubleveltag->listsubleveltag_;
   }
 }
 
-void visitListImport(ListImport listimport)
-{
-  while(listimport  != 0)
-  {
-    /* Code For ListImport Goes Here */
-    visitImport(listimport->import_);
-    listimport = listimport->listimport_;
-  }
-}
-
-void visitImport(Import p)
+void visitSubLevelTag(SubLevelTag p)
 {
   switch(p->kind)
   {
-  case is_FileImport:
-    /* Code for FileImport Goes Here */
-    visitFilePath(p->u.fileImport_.filepath_);
+  case is_FieldTag:
+    /* Code for FieldTag Goes Here */
+    visitIdent(p->u.fieldTag_.ident_);
+    visitValue(p->u.fieldTag_.value_);
+    break;
+  case is_InheritTag:
+    /* Code for InheritTag Goes Here */
+    visitIdent(p->u.inheritTag_.ident_);
     break;
 
   default:
-    fprintf(stderr, "Error: bad kind field when printing Import!\n");
-    exit(1);
-  }
-}
-
-void visitFilePath(FilePath p)
-{
-  switch(p->kind)
-  {
-  case is_Path:
-    /* Code for Path Goes Here */
-    visitString(p->u.path_.string_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing FilePath!\n");
-    exit(1);
-  }
-}
-
-void visitSectionDecl(SectionDecl p)
-{
-  switch(p->kind)
-  {
-  case is_SecDecl:
-    /* Code for SecDecl Goes Here */
-    visitIdent(p->u.secDecl_.ident_);
-    visitSectionContent(p->u.secDecl_.sectioncontent_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SectionDecl!\n");
-    exit(1);
-  }
-}
-
-void visitSectionContent(SectionContent p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleSecCont:
-    /* Code for SimpleSecCont Goes Here */
-    visitListFieldDecl(p->u.simpleSecCont_.listfielddecl_);
-    break;
-  case is_SecContent:
-    /* Code for SecContent Goes Here */
-    visitListInherit(p->u.secContent_.listinherit_);
-    visitListFieldDecl(p->u.secContent_.listfielddecl_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SectionContent!\n");
-    exit(1);
-  }
-}
-
-void visitListFieldDecl(ListFieldDecl listfielddecl)
-{
-  while(listfielddecl  != 0)
-  {
-    /* Code For ListFieldDecl Goes Here */
-    visitFieldDecl(listfielddecl->fielddecl_);
-    listfielddecl = listfielddecl->listfielddecl_;
-  }
-}
-
-void visitListInherit(ListInherit listinherit)
-{
-  while(listinherit  != 0)
-  {
-    /* Code For ListInherit Goes Here */
-    visitInherit(listinherit->inherit_);
-    listinherit = listinherit->listinherit_;
-  }
-}
-
-void visitInherit(Inherit p)
-{
-  switch(p->kind)
-  {
-  case is_InheritSection:
-    /* Code for InheritSection Goes Here */
-    visitIdent(p->u.inheritSection_.ident_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing Inherit!\n");
-    exit(1);
-  }
-}
-
-void visitFieldDecl(FieldDecl p)
-{
-  switch(p->kind)
-  {
-  case is_FieldDeclar:
-    /* Code for FieldDeclar Goes Here */
-    visitIdent(p->u.fieldDeclar_.ident_);
-    visitValue(p->u.fieldDeclar_.value_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing FieldDecl!\n");
+    fprintf(stderr, "Error: bad kind field when printing SubLevelTag!\n");
     exit(1);
   }
 }
