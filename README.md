@@ -13,7 +13,13 @@ Checklist delle cose da fare:
 - [ ] Definire descrizione sintetica della soluzione; 
 - [ ] Fornire MakeFile; 
 
-# Sintassi 
+## Utilizzo
+Per generare i file con BNFC:
+```
+	bnfc -m -o PseudoXML --c pseudoXMLgrammatica.cf
+```
+
+## Sintassi 
 Il file è composto da una sequenza di sezioni identificate dal tag **section** il cui nome è dato dall'attributo **name**.
 Ogni sezione contiene più tag **field** che assegnano valori a variabili indicate da **name**.
 Etichette e variabili sono stringhe alfanumeriche, valori sono interi, bool, stringhe tra "" o altro preceduto da '$' ed eventuale prefisso *nomesezione.* per variabili **non locali**. 
