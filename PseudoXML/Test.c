@@ -14,6 +14,7 @@
 #include "Parser.h"
 #include "Printer.h"
 #include "Absyn.h"
+#include "PseudoXMLParserSupport.h"
 
 void usage(void) {
   printf("usage: Call with one of the following argument combinations:\n");
@@ -61,6 +62,14 @@ int main(int argc, char ** argv)
       printf("%s\n\n", showSourceFile(parse_tree));
       printf("[Linearized Tree]\n");
       printf("%s\n\n", printSourceFile(parse_tree));
+    }
+    if (check_toplevel_tag_order(parse_tree)) {
+      printf("Error: imports must precede sections.\n");
+      return 1;
+    }
+    if (check_sublevel_tag_order(parse_tree)) {
+      printf("Error: inherited fields must precede normal fields.\n");
+      return 1;
     }
     free_SourceFile(parse_tree);
     return 0;

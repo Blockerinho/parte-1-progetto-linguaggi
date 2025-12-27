@@ -590,8 +590,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   137,   137,   140,   141,   143,   144,   146,   147,   149,
-     150,   152,   153,   154,   155,   157,   158,   160,   161
+       0,   137,   137,   141,   142,   146,   147,   151,   152,   156,
+     157,   161,   162,   163,   164,   168,   169,   173,   174
 };
 #endif
 
@@ -1303,102 +1303,102 @@ yyreduce:
     {
   case 2: /* SourceFile: ListTopLevelTag  */
 #line 137 "pseudoXMLgrammatica.y"
-                  { (yyval.sourcefile_) = make_MainFile(reverseListTopLevelTag((yyvsp[0].listtopleveltag_))); result->sourcefile_ = (yyval.sourcefile_); }
+                    { (yyval.sourcefile_) = make_MainFile(reverseListTopLevelTag((yyvsp[0].listtopleveltag_))); result->sourcefile_ = (yyval.sourcefile_); }
 #line 1308 "Parser.c"
     break;
 
   case 3: /* ListTopLevelTag: %empty  */
-#line 140 "pseudoXMLgrammatica.y"
-                              { (yyval.listtopleveltag_) = 0; }
+#line 141 "pseudoXMLgrammatica.y"
+                { (yyval.listtopleveltag_) = 0; }
 #line 1314 "Parser.c"
     break;
 
   case 4: /* ListTopLevelTag: ListTopLevelTag TopLevelTag  */
-#line 141 "pseudoXMLgrammatica.y"
+#line 142 "pseudoXMLgrammatica.y"
                                 { (yyval.listtopleveltag_) = make_ListTopLevelTag((yyvsp[0].topleveltag_), (yyvsp[-1].listtopleveltag_)); }
 #line 1320 "Parser.c"
     break;
 
   case 5: /* TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT  */
-#line 143 "pseudoXMLgrammatica.y"
-                                                                    { (yyval.topleveltag_) = make_FileImportTag((yyvsp[-4]._string)); }
+#line 146 "pseudoXMLgrammatica.y"
+                                                          { (yyval.topleveltag_) = make_FileImportTag((yyvsp[-4]._string)); }
 #line 1326 "Parser.c"
     break;
 
   case 6: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
-#line 144 "pseudoXMLgrammatica.y"
+#line 147 "pseudoXMLgrammatica.y"
                                                                                         { (yyval.topleveltag_) = make_SectionTag((yyvsp[-6]._string), reverseListSubLevelTag((yyvsp[-4].listsubleveltag_))); }
 #line 1332 "Parser.c"
     break;
 
   case 7: /* ListSubLevelTag: %empty  */
-#line 146 "pseudoXMLgrammatica.y"
-                              { (yyval.listsubleveltag_) = 0; }
+#line 151 "pseudoXMLgrammatica.y"
+                { (yyval.listsubleveltag_) = 0; }
 #line 1338 "Parser.c"
     break;
 
   case 8: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 147 "pseudoXMLgrammatica.y"
+#line 152 "pseudoXMLgrammatica.y"
                                 { (yyval.listsubleveltag_) = make_ListSubLevelTag((yyvsp[0].subleveltag_), (yyvsp[-1].listsubleveltag_)); }
 #line 1344 "Parser.c"
     break;
 
   case 9: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 149 "pseudoXMLgrammatica.y"
-                                                                                    { (yyval.subleveltag_) = make_FieldTag((yyvsp[-6]._string), (yyvsp[-4].value_)); }
+#line 156 "pseudoXMLgrammatica.y"
+                                                                          { (yyval.subleveltag_) = make_FieldTag((yyvsp[-6]._string), (yyvsp[-4].value_)); }
 #line 1350 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 150 "pseudoXMLgrammatica.y"
+#line 157 "pseudoXMLgrammatica.y"
                                                            { (yyval.subleveltag_) = make_InheritTag((yyvsp[-4]._string)); }
 #line 1356 "Parser.c"
     break;
 
   case 11: /* Value: _INTEGER_  */
-#line 152 "pseudoXMLgrammatica.y"
-                  { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
+#line 161 "pseudoXMLgrammatica.y"
+              { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
 #line 1362 "Parser.c"
     break;
 
   case 12: /* Value: Boolean  */
-#line 153 "pseudoXMLgrammatica.y"
+#line 162 "pseudoXMLgrammatica.y"
             { (yyval.value_) = make_ValueBool((yyvsp[0].boolean_)); }
 #line 1368 "Parser.c"
     break;
 
   case 13: /* Value: _STRING_  */
-#line 154 "pseudoXMLgrammatica.y"
+#line 163 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
 #line 1374 "Parser.c"
     break;
 
   case 14: /* Value: NonLocVar  */
-#line 155 "pseudoXMLgrammatica.y"
+#line 164 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueNonLoc((yyvsp[0].nonlocvar_)); }
 #line 1380 "Parser.c"
     break;
 
   case 15: /* Boolean: _KW_true  */
-#line 157 "pseudoXMLgrammatica.y"
-                   { (yyval.boolean_) = make_Boolean_true(); }
+#line 168 "pseudoXMLgrammatica.y"
+             { (yyval.boolean_) = make_Boolean_true(); }
 #line 1386 "Parser.c"
     break;
 
   case 16: /* Boolean: _KW_false  */
-#line 158 "pseudoXMLgrammatica.y"
+#line 169 "pseudoXMLgrammatica.y"
               { (yyval.boolean_) = make_Boolean_false(); }
 #line 1392 "Parser.c"
     break;
 
   case 17: /* NonLocVar: _DOLLAR T_Ident  */
-#line 160 "pseudoXMLgrammatica.y"
-                            { (yyval.nonlocvar_) = make_SimpleNonLoc((yyvsp[0]._string)); }
+#line 173 "pseudoXMLgrammatica.y"
+                    { (yyval.nonlocvar_) = make_SimpleNonLoc((yyvsp[0]._string)); }
 #line 1398 "Parser.c"
     break;
 
   case 18: /* NonLocVar: _DOLLAR T_Ident _DOT T_Ident  */
-#line 161 "pseudoXMLgrammatica.y"
+#line 174 "pseudoXMLgrammatica.y"
                                  { (yyval.nonlocvar_) = make_NonLoc((yyvsp[-2]._string), (yyvsp[0]._string)); }
 #line 1404 "Parser.c"
     break;
@@ -1602,7 +1602,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 164 "pseudoXMLgrammatica.y"
+#line 177 "pseudoXMLgrammatica.y"
 
 
 
