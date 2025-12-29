@@ -70,6 +70,9 @@ ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
   return prev;
 }
 
+int reached_section = 0;
+int reached_field = 0;
+
 /* End C preamble code */
 %}
 
@@ -143,8 +146,8 @@ ListTopLevelTag
 ;
 
 TopLevelTag
-  : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4); }
-  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); }
+  : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4, reached_section); }
+  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); reached_section = 1; reached_field = 0;}
 ;
 
 ListSubLevelTag
@@ -153,8 +156,8 @@ ListSubLevelTag
 ;
 
 SubLevelTag
-  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); }
-  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4); }
+  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); reached_field = 1; }
+  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4, reached_field); }
 ;
 
 Value

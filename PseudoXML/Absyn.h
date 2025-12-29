@@ -79,7 +79,7 @@ struct TopLevelTag_
   } u;
 };
 
-TopLevelTag make_FileImportTag(String p0);
+TopLevelTag make_FileImportTag(String p0, int reached_section);
 TopLevelTag make_SectionTag(Ident p0, ListSubLevelTag p1);
 
 struct ListSubLevelTag_
@@ -101,7 +101,7 @@ struct SubLevelTag_
 };
 
 SubLevelTag make_FieldTag(Ident p0, Value p1);
-SubLevelTag make_InheritTag(Ident p0);
+SubLevelTag make_InheritTag(Ident p0, int reached_field);
 
 struct Value_
 {

@@ -63,14 +63,6 @@ int main(int argc, char ** argv)
       printf("[Linearized Tree]\n");
       printf("%s\n\n", printSourceFile(parse_tree));
     }
-    if (check_toplevel_tag_order(parse_tree)) {
-      printf("Error: imports must precede sections.\n");
-      return 1;
-    }
-    if (check_sublevel_tag_order(parse_tree)) {
-      printf("Error: inherited fields must precede normal fields.\n");
-      return 1;
-    }
     section_entry* bindings = create_bindings_from_tree(parse_tree);
     print_bindings(bindings);
     free_SourceFile(parse_tree);
