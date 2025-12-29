@@ -27,6 +27,7 @@ struct field_entry {
     Boolean value_Boolean;
     String value_String;
   };
+  Value value;
   section_entry* section;
   field_entry* prev;
   field_entry* next;
@@ -35,13 +36,7 @@ struct field_entry {
   backlink* backlinks;
 };
 
-field_entry* create_field_entry(char* name, section_entry* section, field_entry* next);
-field_entry* create_field_entry_Integer(char* name, section_entry* section, field_entry* next, Integer value);
-field_entry* create_field_entry_Bool(char* name, section_entry* section, field_entry* next, Boolean value);
-field_entry* create_field_entry_String(char* name, section_entry* section, field_entry* next, String value);
-field_entry* create_field_entry_Local(char* name, section_entry* section, field_entry* next, field_entry* copy_from);
-field_entry* create_field_entry_NonLocal(char* name, section_entry* section, field_entry* next, field_entry* copy_from);
-field_entry* create_field_entry_Inherited(char* name, section_entry* section, field_entry* next, field_entry* inherit_from);
+field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings);
 
 /* risoluzione dei valori */ 
 field_entry* resolve_value(field_entry* field);
@@ -56,6 +51,11 @@ struct backlink {
 
 backlink* create_backlink(field_entry* ptr, backlink* next);
 
+void fill_sec_name(section_entry* section);
+
+
+field_entry* inherit_fields(char* section_name, field_entry* next, section_entry* bindings);
+
 /* cancellazioni */
 void delete_field(field_entry* field);
 int delete_field_by_name(section_entry* section, const char* field_name);
@@ -63,11 +63,8 @@ void delete_section(section_entry* section);
 section_entry* delete_section_by_name(section_entry* sections, const char* section_name);
 void free_all_sections(section_entry* sections);
 
-/* dato un albero, popola la struttura dati con i binding */
-section_entry* create_bindings_from_tree(SourceFile tree);
-
-/* data una sezione e un nome di field, cerca il field con quel nome in quella sezione */
-field_entry* search_bindings_local(section_entry* section, char* field_name);
+/* dati i fields della sezione corrente e un nome di field, cerca il field con quel nome tra i field dati */
+field_entry* search_bindings_local(char* field_name, field_entry* fields);
 
 /* dato un nome di sezione e un nome di field, cerca la sezione con quel nome e quindi il field con quel nome */
 field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_name, char* field_name);
