@@ -56,6 +56,13 @@ field_entry* resolve_value(field_entry* field);
 field_entry* get_resolved_value(section_entry* sections,const char* section_name,const char* field_name);
 void print_resolved_value(field_entry* resolved);
 
+/* cancellazioni */
+void delete_field(field_entry* field);
+int delete_field_by_name(section_entry* section, const char* field_name);
+void delete_section(section_entry* section);
+section_entry* delete_section_by_name(section_entry* sections, const char* section_name);
+void free_all_sections(section_entry* sections);
+
 /* lista concatenata di riferimenti a campi */
 struct backlink {
  field_entry* ptr;
