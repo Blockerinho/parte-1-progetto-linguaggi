@@ -32,7 +32,7 @@ struct field_entry {
   enum { is_Integer, is_Boolean, is_String, is_Local, is_NonLocal, is_Inherited } kind;
   union {
     Integer value_Integer;
-    int value_Boolean;
+    Boolean value_Boolean;
     String value_String;
   };
   section_entry* section;
@@ -45,7 +45,7 @@ struct field_entry {
 
 field_entry* create_field_entry(char* name, section_entry* section, field_entry* next);
 field_entry* create_field_entry_Integer(char* name, section_entry* section, field_entry* next, Integer value);
-field_entry* create_field_entry_Bool(char* name, section_entry* section, field_entry* next, int value);
+field_entry* create_field_entry_Bool(char* name, section_entry* section, field_entry* next, Boolean value);
 field_entry* create_field_entry_String(char* name, section_entry* section, field_entry* next, String value);
 field_entry* create_field_entry_Local(char* name, section_entry* section, field_entry* next, field_entry* copy_from);
 field_entry* create_field_entry_NonLocal(char* name, section_entry* section, field_entry* next, field_entry* copy_from);
@@ -74,4 +74,11 @@ void free_all_sections(section_entry* sections);
 /* dato un albero, popola la struttura dati con i binding */
 section_entry* create_bindings_from_tree(SourceFile tree);
 
+/* data una sezione e un nome di field, cerca il field con quel nome in quella sezione */
+field_entry* search_bindings_local(section_entry* section, char* field_name);
+
+/* dato un nome di sezione e un nome di field, cerca la sezione con quel nome e quindi il field con quel nome */
+field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_name, char* field_name);
+
+void print_bindings(section_entry* bindings);
 #endif
