@@ -64,6 +64,12 @@ struct backlink {
 
 backlink* create_backlink(field_entry* ptr, backlink* next);
 
+/* cancellazioni */
+void delete_field(field_entry* field);
+int delete_field_by_name(section_entry* section, const char* field_name);
+void delete_section(section_entry* section);
+section_entry* delete_section_by_name(section_entry* sections, const char* section_name);
+void free_all_sections(section_entry* sections);
 
 /* dato un albero, popola la struttura dati con i binding */
 section_entry* create_bindings_from_tree(SourceFile tree);
