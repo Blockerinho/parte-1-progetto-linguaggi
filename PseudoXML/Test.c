@@ -71,6 +71,8 @@ int main(int argc, char ** argv)
       printf("Error: inherited fields must precede normal fields.\n");
       return 1;
     }
+    section_entry* bindings = create_bindings_from_tree(parse_tree);
+    print_bindings(bindings);
     free_SourceFile(parse_tree);
     return 0;
   }
