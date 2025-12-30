@@ -41,7 +41,7 @@ ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2)
 TopLevelTag make_FileImportTag(String p1, int reached_section)
 {
     if (reached_section) {
-      fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+      fprintf(stderr, "Error: imports must come before sections.\n");
       exit(1);
     }
     TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
@@ -107,7 +107,7 @@ SubLevelTag make_FieldTag(Ident p1, Value p2)
 SubLevelTag make_InheritTag(Ident p1, int reached_field)
 {
     if (reached_field) {
-      fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+      fprintf(stderr, "Error: inherited fields must come before normal ones.\n");
       exit(1);
     }
     SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
