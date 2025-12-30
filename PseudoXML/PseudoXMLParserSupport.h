@@ -3,14 +3,6 @@
 
 #include "Absyn.h"
 
-/* dato un albero, verifica che tutti gli import siano prima di tutte le
-sezioni; se è così ritorna 0, altrimenti ritorna 1. */
-int check_toplevel_tag_order(SourceFile p);
-
-/* dato un albero, verifica che in ogni sezione tutti gli inherit siano prima
-di tutti i field; se è così ritorna 0, altrimenti ritorna 1. */
-int check_sublevel_tag_order(SourceFile p);
-
 /* strutture dati per mantenere i binding */
 typedef struct section_entry section_entry;
 typedef struct field_entry field_entry;

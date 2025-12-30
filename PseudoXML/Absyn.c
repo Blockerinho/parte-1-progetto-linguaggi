@@ -38,8 +38,12 @@ ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2)
 
 /********************   FileImportTag    ********************/
 
-TopLevelTag make_FileImportTag(String p1)
+TopLevelTag make_FileImportTag(String p1, int reached_section)
 {
+    if (reached_section) {
+      fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+      exit(1);
+    }
     TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
@@ -100,8 +104,12 @@ SubLevelTag make_FieldTag(Ident p1, Value p2)
 
 /********************   InheritTag    ********************/
 
-SubLevelTag make_InheritTag(Ident p1)
+SubLevelTag make_InheritTag(Ident p1, int reached_field)
 {
+    if (reached_field) {
+      fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+      exit(1);
+    }
     SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
     if (!tmp)
     {
@@ -230,142 +238,6 @@ NonLocVar make_NonLoc(Ident p1, Ident p2)
     tmp->u.nonLoc_.ident_1 = p1;
     tmp->u.nonLoc_.ident_2 = p2;
     return tmp;
-}
-
-/***************************   Cloning   ******************************/
-
-SourceFile clone_SourceFile(SourceFile p)
-{
-  switch(p->kind)
-  {
-  case is_MainFile:
-    return make_MainFile (clone_ListTopLevelTag(p->u.mainFile_.listtopleveltag_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning SourceFile!\n");
-    exit(1);
-  }
-}
-
-ListTopLevelTag clone_ListTopLevelTag(ListTopLevelTag listtopleveltag)
-{
-  if (listtopleveltag)
-  {
-    /* clone of non-empty list */
-    return make_ListTopLevelTag
-      ( clone_TopLevelTag(listtopleveltag->topleveltag_)
-      , clone_ListTopLevelTag(listtopleveltag->listtopleveltag_)
-      );
-  }
-  else return NULL; /* clone of empty list */
-}
-
-TopLevelTag clone_TopLevelTag(TopLevelTag p)
-{
-  switch(p->kind)
-  {
-  case is_FileImportTag:
-    return make_FileImportTag (strdup(p->u.fileImportTag_.string_));
-
-  case is_SectionTag:
-    return make_SectionTag
-      ( strdup(p->u.sectionTag_.ident_)
-      , clone_ListSubLevelTag(p->u.sectionTag_.listsubleveltag_)
-      );
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning TopLevelTag!\n");
-    exit(1);
-  }
-}
-
-ListSubLevelTag clone_ListSubLevelTag(ListSubLevelTag listsubleveltag)
-{
-  if (listsubleveltag)
-  {
-    /* clone of non-empty list */
-    return make_ListSubLevelTag
-      ( clone_SubLevelTag(listsubleveltag->subleveltag_)
-      , clone_ListSubLevelTag(listsubleveltag->listsubleveltag_)
-      );
-  }
-  else return NULL; /* clone of empty list */
-}
-
-SubLevelTag clone_SubLevelTag(SubLevelTag p)
-{
-  switch(p->kind)
-  {
-  case is_FieldTag:
-    return make_FieldTag
-      ( strdup(p->u.fieldTag_.ident_)
-      , clone_Value(p->u.fieldTag_.value_)
-      );
-
-  case is_InheritTag:
-    return make_InheritTag (strdup(p->u.inheritTag_.ident_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning SubLevelTag!\n");
-    exit(1);
-  }
-}
-
-Value clone_Value(Value p)
-{
-  switch(p->kind)
-  {
-  case is_ValueInt:
-    return make_ValueInt (p->u.valueInt_.integer_);
-
-  case is_ValueBool:
-    return make_ValueBool (clone_Boolean(p->u.valueBool_.boolean_));
-
-  case is_ValueString:
-    return make_ValueString (strdup(p->u.valueString_.string_));
-
-  case is_ValueNonLoc:
-    return make_ValueNonLoc (clone_NonLocVar(p->u.valueNonLoc_.nonlocvar_));
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning Value!\n");
-    exit(1);
-  }
-}
-
-Boolean clone_Boolean(Boolean p)
-{
-  switch(p->kind)
-  {
-  case is_Boolean_true:
-    return make_Boolean_true ();
-
-  case is_Boolean_false:
-    return make_Boolean_false ();
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning Boolean!\n");
-    exit(1);
-  }
-}
-
-NonLocVar clone_NonLocVar(NonLocVar p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleNonLoc:
-    return make_SimpleNonLoc (strdup(p->u.simpleNonLoc_.ident_));
-
-  case is_NonLoc:
-    return make_NonLoc
-      ( strdup(p->u.nonLoc_.ident_1)
-      , strdup(p->u.nonLoc_.ident_2)
-      );
-
-  default:
-    fprintf(stderr, "Error: bad kind field when cloning NonLocVar!\n");
-    exit(1);
-  }
 }
 
 /********************   Recursive Destructors    **********************/
