@@ -29,6 +29,7 @@
 #include <string.h>
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
+#include "Parser.h"
 
 #define YYMAXDEPTH 10000000
 
@@ -152,7 +153,16 @@ ListTopLevelTag
 ;
 
 TopLevelTag
-  : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4, reached_section); }
+  : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT {
+      $$ = make_FileImportTag($4, reached_section);
+      FILE* i = fopen($4, "r");
+      if (!i) {
+        fprintf(stderr, "Error opening imported file %s\n", $4);
+        perror("Error");
+        exit(1);
+      }
+      pSourceFile(i, bindings);
+     }
   | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
 ;
 
