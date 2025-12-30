@@ -53,7 +53,10 @@ int main(int argc, char ** argv)
   }
   else input = stdin;
   /* The default entry point is used. For other options see Parser.h */
-  parse_tree = pSourceFile(input);
+  section_entry* bindings = NULL;
+  parse_tree = pSourceFile(input, &bindings);
+
+
   if (parse_tree)
   {
     printf("\nParse Successful!\n");
@@ -63,7 +66,6 @@ int main(int argc, char ** argv)
       printf("[Linearized Tree]\n");
       printf("%s\n\n", printSourceFile(parse_tree));
     }
-    section_entry* bindings = create_bindings_from_tree(parse_tree);
     print_bindings(bindings);
     free_SourceFile(parse_tree);
     return 0;

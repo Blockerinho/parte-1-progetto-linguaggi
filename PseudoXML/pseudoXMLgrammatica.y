@@ -5,6 +5,10 @@
 /* Generate header file for lexer. */
 %defines "Bison.h"
 
+%code requires {
+  #include "PseudoXMLParserSupport.h"
+}
+
 /* Reentrant parser */
 %pure_parser
   /* From Bison 2.3b (2008): %define api.pure full */
@@ -15,7 +19,7 @@
 %locations
 
 /* Argument to the parser to be filled with the parsed tree. */
-%parse-param { YYSTYPE *result }
+%parse-param { YYSTYPE *result } { section_entry** bindings }
 
 %{
 /* Begin C preamble code */
@@ -24,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Absyn.h"
+#include "PseudoXMLParserSupport.h"
 
 #define YYMAXDEPTH 10000000
 
@@ -72,6 +77,7 @@ ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
 
 int reached_section = 0;
 int reached_field = 0;
+field_entry* tmp_fields = NULL;
 
 /* End C preamble code */
 %}
@@ -93,13 +99,13 @@ int reached_field = 0;
 }
 
 %{
-void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, const char *msg)
+void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, const char *msg)
 {
   fprintf(stderr, "error: %d,%d: %s at %s\n",
     loc->first_line, loc->first_column, msg, pseudo_xm_lgrammatica_get_text(scanner));
 }
 
-int yyparse(yyscan_t scanner, YYSTYPE *result);
+int yyparse(yyscan_t scanner, YYSTYPE *result, section_entry** bindings);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 %}
@@ -147,7 +153,7 @@ ListTopLevelTag
 
 TopLevelTag
   : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT { $$ = make_FileImportTag($4, reached_section); }
-  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); reached_section = 1; reached_field = 0;}
+  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
 ;
 
 ListSubLevelTag
@@ -156,8 +162,8 @@ ListSubLevelTag
 ;
 
 SubLevelTag
-  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); reached_field = 1; }
-  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4, reached_field); }
+  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); reached_field = 1; tmp_fields = create_field_entry($5, $7, NULL, tmp_fields, *bindings); }
+  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4, reached_field); tmp_fields = inherit_fields($4, tmp_fields, *bindings); }
 ;
 
 Value
@@ -181,7 +187,7 @@ NonLocVar
 
 
 /* Entrypoint: parse SourceFile from file. */
-SourceFile pSourceFile(FILE *inp)
+SourceFile pSourceFile(FILE *inp, section_entry** bindings)
 {
   YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(inp);
@@ -189,7 +195,7 @@ SourceFile pSourceFile(FILE *inp)
     fprintf(stderr, "Failed to initialize lexer.\n");
     return 0;
   }
-  int error = yyparse(scanner, &result);
+  int error = yyparse(scanner, &result, bindings);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
@@ -202,7 +208,7 @@ SourceFile pSourceFile(FILE *inp)
 }
 
 /* Entrypoint: parse SourceFile from string. */
-SourceFile psSourceFile(const char *str)
+SourceFile psSourceFile(const char *str, section_entry** bindings)
 {
   YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(0);
@@ -211,7 +217,7 @@ SourceFile psSourceFile(const char *str)
     return 0;
   }
   YY_BUFFER_STATE buf = pseudo_xm_lgrammatica__scan_string(str, scanner);
-  int error = yyparse(scanner, &result);
+  int error = yyparse(scanner, &result, bindings);
   pseudo_xm_lgrammatica__delete_buffer(buf, scanner);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)

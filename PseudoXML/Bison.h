@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int pseudo_xm_lgrammatica_debug;
 #endif
+/* "%code requires" blocks.  */
+#line 8 "pseudoXMLgrammatica.y"
+
+  #include "PseudoXMLParserSupport.h"
+
+#line 53 "Bison.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -80,7 +86,7 @@ extern int pseudo_xm_lgrammatica_debug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 80 "pseudoXMLgrammatica.y"
+#line 86 "pseudoXMLgrammatica.y"
 
   int    _int;
   char   _char;
@@ -95,7 +101,7 @@ union YYSTYPE
   Boolean boolean_;
   NonLocVar nonlocvar_;
 
-#line 99 "Bison.h"
+#line 105 "Bison.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -120,7 +126,7 @@ struct YYLTYPE
 
 
 
-int pseudo_xm_lgrammatica_parse (yyscan_t scanner, YYSTYPE *result);
+int pseudo_xm_lgrammatica_parse (yyscan_t scanner, YYSTYPE *result, section_entry** bindings);
 
 
 #endif /* !YY_PSEUDO_XM_LGRAMMATICA_BISON_H_INCLUDED  */
