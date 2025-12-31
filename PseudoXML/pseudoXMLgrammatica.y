@@ -19,7 +19,7 @@
 %locations
 
 /* Argument to the parser to be filled with the parsed tree. */
-%parse-param { YYSTYPE *result } { section_entry** bindings }
+%parse-param { YYSTYPE *result } { section_entry** bindings } { int* reached_section}
 
 %{
 /* Begin C preamble code */
@@ -76,7 +76,6 @@ ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
   return prev;
 }
 
-int reached_section = 0;
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
 
@@ -100,13 +99,13 @@ field_entry* tmp_fields = NULL;
 }
 
 %{
-void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, const char *msg)
+void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section, const char *msg)
 {
   fprintf(stderr, "error: %d,%d: %s at %s\n",
     loc->first_line, loc->first_column, msg, pseudo_xm_lgrammatica_get_text(scanner));
 }
 
-int yyparse(yyscan_t scanner, YYSTYPE *result, section_entry** bindings);
+int yyparse(yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 %}
@@ -154,7 +153,7 @@ ListTopLevelTag
 
 TopLevelTag
   : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT {
-      $$ = make_FileImportTag($4, reached_section);
+      $$ = make_FileImportTag($4, *reached_section);
       FILE* i = fopen($4, "r");
       if (!i) {
         fprintf(stderr, "Error opening imported file %s\n", $4);
@@ -163,7 +162,7 @@ TopLevelTag
       }
       pSourceFile(i, bindings);
      }
-  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
+  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); *reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
 ;
 
 ListSubLevelTag
@@ -199,13 +198,14 @@ NonLocVar
 /* Entrypoint: parse SourceFile from file. */
 SourceFile pSourceFile(FILE *inp, section_entry** bindings)
 {
+  int reached_section = 0;
   YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(inp);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
     return 0;
   }
-  int error = yyparse(scanner, &result, bindings);
+  int error = yyparse(scanner, &result, bindings, &reached_section);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
@@ -220,6 +220,7 @@ SourceFile pSourceFile(FILE *inp, section_entry** bindings)
 /* Entrypoint: parse SourceFile from string. */
 SourceFile psSourceFile(const char *str, section_entry** bindings)
 {
+  int reached_section = 0;
   YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(0);
   if (!scanner) {
@@ -227,7 +228,7 @@ SourceFile psSourceFile(const char *str, section_entry** bindings)
     return 0;
   }
   YY_BUFFER_STATE buf = pseudo_xm_lgrammatica__scan_string(str, scanner);
-  int error = yyparse(scanner, &result, bindings);
+  int error = yyparse(scanner, &result, bindings, &reached_section);
   pseudo_xm_lgrammatica__delete_buffer(buf, scanner);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)

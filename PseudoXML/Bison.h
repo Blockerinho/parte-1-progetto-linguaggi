@@ -86,7 +86,7 @@ extern int pseudo_xm_lgrammatica_debug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 87 "pseudoXMLgrammatica.y"
+#line 86 "pseudoXMLgrammatica.y"
 
   int    _int;
   char   _char;
@@ -126,7 +126,7 @@ struct YYLTYPE
 
 
 
-int pseudo_xm_lgrammatica_parse (yyscan_t scanner, YYSTYPE *result, section_entry** bindings);
+int pseudo_xm_lgrammatica_parse (yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section);
 
 
 #endif /* !YY_PSEUDO_XM_LGRAMMATICA_BISON_H_INCLUDED  */
