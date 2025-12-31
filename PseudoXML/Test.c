@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "Parser.h"
-#include "Printer.h"
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
 
@@ -27,7 +26,6 @@ void usage(void) {
 int main(int argc, char ** argv)
 {
   FILE *input;
-  SourceFile parse_tree;
   int quiet = 0;
   char *filename = NULL;
 
@@ -46,29 +44,19 @@ int main(int argc, char ** argv)
 
   section_entry* bindings = NULL;
   if (filename) {
-    parse_tree = pnSourceFile(filename, &bindings);
+    pnSourceFile(filename, &bindings);
     if (!input) {
       usage();
       exit(1);
     }
   }
   else {
-    parse_tree = pSourceFile(stdin, &bindings);
+    pSourceFile(stdin, &bindings);
   }
   /* The default entry point is used. For other options see Parser.h */
 
-
-  if (parse_tree)
-  {
-    printf("\nParse Successful!\n");
-    if (!quiet) {
-      printf("\n[Abstract Syntax]\n");
-      printf("%s\n\n", showSourceFile(parse_tree));
-      printf("[Linearized Tree]\n");
-      printf("%s\n\n", printSourceFile(parse_tree));
-    }
+  if (bindings) {
     print_bindings(bindings);
-    free_SourceFile(parse_tree);
     return 0;
   }
   return 1;

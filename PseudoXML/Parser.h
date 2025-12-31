@@ -7,8 +7,8 @@
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
 
-SourceFile  pSourceFile(FILE *inp, section_entry** bindings);
-SourceFile psSourceFile(const char *str, section_entry** bindings);
-SourceFile pnSourceFile(char *filename, section_entry** bindings);
+void pSourceFile(FILE *inp, section_entry** bindings);
+void psSourceFile(const char *str, section_entry** bindings);
+void pnSourceFile(char *filename, section_entry** bindings);
 
 #endif

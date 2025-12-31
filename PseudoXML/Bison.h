@@ -47,7 +47,7 @@ extern int pseudo_xm_lgrammatica_debug;
 /* "%code requires" blocks.  */
 #line 8 "pseudoXMLgrammatica.y"
 
-  #include "PseudoXMLParserSupport.h"
+#include "PseudoXMLParserSupport.h"
 
 #line 53 "Bison.h"
 
@@ -86,22 +86,15 @@ extern int pseudo_xm_lgrammatica_debug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 121 "pseudoXMLgrammatica.y"
+#line 87 "pseudoXMLgrammatica.y"
 
   int    _int;
   char   _char;
   double _double;
   char*  _string;
-  SourceFile sourcefile_;
-  ListTopLevelTag listtopleveltag_;
-  TopLevelTag topleveltag_;
-  ListSubLevelTag listsubleveltag_;
-  SubLevelTag subleveltag_;
   Value value_;
-  Boolean boolean_;
-  NonLocVar nonlocvar_;
 
-#line 105 "Bison.h"
+#line 98 "Bison.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -126,7 +119,7 @@ struct YYLTYPE
 
 
 
-int pseudo_xm_lgrammatica_parse (yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section);
+int pseudo_xm_lgrammatica_parse (yyscan_t scanner, section_entry** bindings, int* reached_section);
 
 
 #endif /* !YY_PSEUDO_XM_LGRAMMATICA_BISON_H_INCLUDED  */

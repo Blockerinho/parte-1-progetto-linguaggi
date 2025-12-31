@@ -6,12 +6,11 @@
 %defines "Bison.h"
 
 %code requires {
-  #include "PseudoXMLParserSupport.h"
+#include "PseudoXMLParserSupport.h"
 }
 
 /* Reentrant parser */
-%pure_parser
-  /* From Bison 2.3b (2008): %define api.pure full */
+%define api.pure full
 %lex-param   { yyscan_t scanner }
 %parse-param { yyscan_t scanner }
 
@@ -19,7 +18,7 @@
 %locations
 
 /* Argument to the parser to be filled with the parsed tree. */
-%parse-param { YYSTYPE *result } { section_entry** bindings } { int* reached_section}
+%parse-param { section_entry** bindings } { int* reached_section}
 
 %{
 /* Begin C preamble code */
@@ -51,48 +50,18 @@ extern char* pseudo_xm_lgrammatica_get_text(yyscan_t scanner);
 
 extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 
-/* List reversal functions. */
-ListTopLevelTag reverseListTopLevelTag(ListTopLevelTag l)
-{
-  ListTopLevelTag prev = 0;
-  ListTopLevelTag tmp = 0;
-  while (l)
-  {
-    tmp = l->listtopleveltag_;
-    l->listtopleveltag_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
-{
-  ListSubLevelTag prev = 0;
-  ListSubLevelTag tmp = 0;
-  while (l)
-  {
-    tmp = l->listsubleveltag_;
-    l->listsubleveltag_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
 
 typedef struct imp_file imp_file;
 struct imp_file {
   ino_t file_ino;
-  imp_file* parent;
   imp_file* next;
 };
 
-imp_file* create_imp_file(ino_t file_ino, imp_file* parent, imp_file* next) {
+imp_file* create_imp_file(ino_t file_ino, imp_file* next) {
   imp_file* myself = (imp_file*) malloc(sizeof(*myself));
   myself->file_ino = file_ino;
-  myself->parent = parent;
   myself->next = next;
   return myself;
 }
@@ -111,9 +80,6 @@ imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
   return NULL;
 }
 
-ino_t current_file;
-
-
 /* End C preamble code */
 %}
 
@@ -123,24 +89,17 @@ ino_t current_file;
   char   _char;
   double _double;
   char*  _string;
-  SourceFile sourcefile_;
-  ListTopLevelTag listtopleveltag_;
-  TopLevelTag topleveltag_;
-  ListSubLevelTag listsubleveltag_;
-  SubLevelTag subleveltag_;
   Value value_;
-  Boolean boolean_;
-  NonLocVar nonlocvar_;
 }
 
 %{
-void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section, const char *msg)
+void yyerror(YYLTYPE *loc, yyscan_t scanner, section_entry** bindings, int* reached_section, const char *msg)
 {
   fprintf(stderr, "error: %d,%d: %s at %s\n",
     loc->first_line, loc->first_column, msg, pseudo_xm_lgrammatica_get_text(scanner));
 }
 
-int yyparse(yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section);
+int yyparse(yyscan_t scanner, section_entry** bindings, int* reached_section);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 %}
@@ -164,93 +123,94 @@ extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 %token<_int>    _INTEGER_
 %token<_string> _IDENT_
 
-%type <sourcefile_> SourceFile
-%type <listtopleveltag_> ListTopLevelTag
-%type <topleveltag_> TopLevelTag
-%type <listsubleveltag_> ListSubLevelTag
-%type <subleveltag_> SubLevelTag
 %type <value_> Value
-%type <boolean_> Boolean
-%type <nonlocvar_> NonLocVar
 
 %start SourceFile
 
 %%
 
 SourceFile
-  : ListTopLevelTag { $$ = make_MainFile(reverseListTopLevelTag($1)); result->sourcefile_ = $$; }
+  : ListTopLevelTag {}
 ;
 
 ListTopLevelTag
-  : /* empty */ { $$ = 0; }
-  | ListTopLevelTag TopLevelTag { $$ = make_ListTopLevelTag($2, $1); }
+  : /* empty */ {}
+  | ListTopLevelTag TopLevelTag {}
 ;
 
 TopLevelTag
   : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT {
-      $$ = make_FileImportTag($4, *reached_section);
+      if (*reached_section) {
+        fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+        exit(1);
+      }
       pnSourceFile($4, bindings);
      }
-  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); *reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
+  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
+      *reached_section = 1;
+      reached_field = 0;
+      *bindings = create_section_entry($5, *bindings);
+      (*bindings)->fields = tmp_fields;
+      tmp_fields = NULL;
+      fill_sec_name(*bindings);
+    }
 ;
 
 ListSubLevelTag
-  : /* empty */ { $$ = 0; }
-  | ListSubLevelTag SubLevelTag { $$ = make_ListSubLevelTag($2, $1); }
+  : /* empty */ {}
+  | ListSubLevelTag SubLevelTag {}
 ;
 
 SubLevelTag
-  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT { $$ = make_FieldTag($5, $7); reached_field = 1; tmp_fields = create_field_entry($5, $7, NULL, tmp_fields, *bindings); }
-  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT { $$ = make_InheritTag($4, reached_field); tmp_fields = inherit_fields($4, tmp_fields, *bindings); }
+  : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT {
+      reached_field = 1;
+      tmp_fields = create_field_entry($5, $7, NULL, tmp_fields, *bindings);
+    }
+  | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT {
+      if (reached_field) {
+        fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+        exit(1);
+      }
+      tmp_fields = inherit_fields($4, tmp_fields, *bindings);
+    }
 ;
 
 Value
   : _INTEGER_ { $$ = make_ValueInt($1); }
-  | Boolean { $$ = make_ValueBool($1); }
+  | _KW_true { $$ = make_ValueBool(1); }
+  | _KW_false { $$ = make_ValueBool(0); }
   | _STRING_ { $$ = make_ValueString($1); }
-  | NonLocVar { $$ = make_ValueNonLoc($1); }
-;
-
-Boolean
-  : _KW_true { $$ = make_Boolean_true(); }
-  | _KW_false { $$ = make_Boolean_false(); }
-;
-
-NonLocVar
-  : _DOLLAR T_Ident { $$ = make_SimpleNonLoc($2); }
-  | _DOLLAR T_Ident _DOT T_Ident { $$ = make_NonLoc($2, $4); }
+  | _DOLLAR T_Ident { $$ = make_ValueLocal($2); }
+  | _DOLLAR T_Ident _DOT T_Ident { $$ = make_ValueNonLocal($2, $4); }
 ;
 
 %%
 
-
 /* Entrypoint: parse SourceFile from file. */
-SourceFile pSourceFile(FILE *inp, section_entry** bindings)
+void pSourceFile(FILE *inp, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(inp);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 
 /* Entrypoint: parse SourceFile from filename. */
-SourceFile pnSourceFile(char* filename, section_entry** bindings)
+void pnSourceFile(char* filename, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
 
   FILE* i = fopen(filename, "r");
   if (!i) {
@@ -266,49 +226,48 @@ SourceFile pnSourceFile(char* filename, section_entry** bindings)
 
   if (search_imp_file(st.st_ino, imp_file_list) != NULL) {
     fprintf(stderr, "Warning: file %s imported twice. There might be an import cycle. Skipping.\n", filename);
-    return result.sourcefile_;
+    return;
   }
   printf("Adding file %s\n", filename);
-  imp_file_list = create_imp_file(st.st_ino, NULL, imp_file_list);
+  imp_file_list = create_imp_file(st.st_ino, imp_file_list);
 
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(i);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 
 /* Entrypoint: parse SourceFile from string. */
-SourceFile psSourceFile(const char *str, section_entry** bindings)
+void psSourceFile(const char *str, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(0);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
   YY_BUFFER_STATE buf = pseudo_xm_lgrammatica__scan_string(str, scanner);
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica__delete_buffer(buf, scanner);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 

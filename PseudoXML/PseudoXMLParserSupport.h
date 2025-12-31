@@ -23,9 +23,9 @@ struct field_entry {
   char* field_name;
   enum { is_Integer, is_Boolean, is_String, is_Local, is_NonLocal, is_Inherited } kind;
   union {
-    Integer value_Integer;
-    Boolean value_Boolean;
-    String value_String;
+    int value_Integer;
+    int value_Boolean;
+    char* value_String;
   };
   Value value;
   section_entry* section;

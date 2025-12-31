@@ -28,46 +28,43 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
   switch(value->kind) {
     case is_ValueInt:
       myself->kind = is_Integer;
-      myself->value_Integer = value->u.valueInt_.integer_;
+      myself->value_Integer = value->value_int;
       break;
     case is_ValueBool:
       myself->kind = is_Boolean;
-      myself->value_Boolean = value->u.valueBool_.boolean_;
+      myself->value_Boolean = value->value_bool;
       break;
     case is_ValueString:
       myself->kind = is_String;
-      myself->value_String = value->u.valueString_.string_;
+      myself->value_String = value->value_string;
       break;
-    case is_ValueNonLoc:
-      switch(value->u.valueNonLoc_.nonlocvar_->kind) {
-        case is_SimpleNonLoc:
-          myself->kind = is_Local;
-          ref_name = value->u.valueNonLoc_.nonlocvar_->u.simpleNonLoc_.ident_;
-          if (strcmp(ref_name, name) == 0) {
-            fprintf(stderr, "Error: a field cannot reference itself.\n");
-            exit(1);
-          }
-          ref = search_bindings_local(ref_name, next);
-          if (!ref) {
-            fprintf(stderr, "Error: field references an unknown field.\n");
-            exit(1);
-          }
-          myself->copy_from = ref;
-          myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
-          break;
-        case is_NonLoc: 
-          myself->kind = is_NonLocal;
-          ref_sec_name = value->u.valueNonLoc_.nonlocvar_->u.nonLoc_.ident_1;
-          ref_name = value->u.valueNonLoc_.nonlocvar_->u.nonLoc_.ident_2;
-          ref = search_bindings_nonlocal(bindings, ref_sec_name, ref_name);
-          if (!ref) {
-            fprintf(stderr, "Error: field references an unknown field.\n");
-            exit(1);
-          }
-          myself->copy_from = ref;
-          myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
-          break;
+    case is_ValueLocal:
+      myself->kind = is_Local;
+      ref_name = value->value_local;
+      if (strcmp(ref_name, name) == 0) {
+        fprintf(stderr, "Error: a field cannot reference itself.\n");
+        exit(1);
       }
+      ref = search_bindings_local(ref_name, next);
+      if (!ref) {
+        fprintf(stderr, "Error: field references an unknown field.\n");
+        exit(1);
+      }
+      myself->copy_from = ref;
+      myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
+      break;
+    case is_ValueNonLocal:
+      myself->kind = is_NonLocal;
+      ref_sec_name = value->value_nonlocal.section_name;
+      ref_name = value->value_nonlocal.field_name;
+      ref = search_bindings_nonlocal(bindings, ref_sec_name, ref_name);
+      if (!ref) {
+        fprintf(stderr, "Error: field references an unknown field.\n");
+        exit(1);
+      }
+      myself->copy_from = ref;
+      myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
+      break;
   }
   return myself;
 }
@@ -152,13 +149,10 @@ void print_bindings(section_entry* bindings) {
           printf("\tField %s: %i {", f->field_name, f->value_Integer);
           break;
         case is_Boolean:
-          switch(f->value_Boolean->kind) {
-            case is_Boolean_true:
-              printf("\tField %s: true {", f->field_name);
-              break;
-            case is_Boolean_false:
+          if (f->value_Boolean == 0) {
               printf("\tField %s: false {", f->field_name);
-              break;
+          } else {
+              printf("\tField %s: true {", f->field_name);
           }
           break;
         case is_String:

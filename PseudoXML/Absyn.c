@@ -6,124 +6,9 @@
 #include <stdlib.h>
 #include "Absyn.h"
 
-/********************   MainFile    ********************/
-
-SourceFile make_MainFile(ListTopLevelTag p1)
-{
-    SourceFile tmp = (SourceFile) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating MainFile!\n");
-        exit(1);
-    }
-    tmp->kind = is_MainFile;
-    tmp->u.mainFile_.listtopleveltag_ = p1;
-    return tmp;
-}
-
-/********************   ListTopLevelTag    ********************/
-
-ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2)
-{
-    ListTopLevelTag tmp = (ListTopLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ListTopLevelTag!\n");
-        exit(1);
-    }
-    tmp->topleveltag_ = p1;
-    tmp->listtopleveltag_ = p2;
-    return tmp;
-}
-
-/********************   FileImportTag    ********************/
-
-TopLevelTag make_FileImportTag(String p1, int reached_section)
-{
-    if (reached_section) {
-      fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
-      exit(1);
-    }
-    TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating FileImportTag!\n");
-        exit(1);
-    }
-    tmp->kind = is_FileImportTag;
-    tmp->u.fileImportTag_.string_ = p1;
-    return tmp;
-}
-
-/********************   SectionTag    ********************/
-
-TopLevelTag make_SectionTag(Ident p1, ListSubLevelTag p2)
-{
-    TopLevelTag tmp = (TopLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating SectionTag!\n");
-        exit(1);
-    }
-    tmp->kind = is_SectionTag;
-    tmp->u.sectionTag_.ident_ = p1;
-    tmp->u.sectionTag_.listsubleveltag_ = p2;
-    return tmp;
-}
-
-/********************   ListSubLevelTag    ********************/
-
-ListSubLevelTag make_ListSubLevelTag(SubLevelTag p1, ListSubLevelTag p2)
-{
-    ListSubLevelTag tmp = (ListSubLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ListSubLevelTag!\n");
-        exit(1);
-    }
-    tmp->subleveltag_ = p1;
-    tmp->listsubleveltag_ = p2;
-    return tmp;
-}
-
-/********************   FieldTag    ********************/
-
-SubLevelTag make_FieldTag(Ident p1, Value p2)
-{
-    SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating FieldTag!\n");
-        exit(1);
-    }
-    tmp->kind = is_FieldTag;
-    tmp->u.fieldTag_.ident_ = p1;
-    tmp->u.fieldTag_.value_ = p2;
-    return tmp;
-}
-
-/********************   InheritTag    ********************/
-
-SubLevelTag make_InheritTag(Ident p1, int reached_field)
-{
-    if (reached_field) {
-      fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
-      exit(1);
-    }
-    SubLevelTag tmp = (SubLevelTag) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating InheritTag!\n");
-        exit(1);
-    }
-    tmp->kind = is_InheritTag;
-    tmp->u.inheritTag_.ident_ = p1;
-    return tmp;
-}
-
 /********************   ValueInt    ********************/
 
-Value make_ValueInt(Integer p1)
+Value make_ValueInt(int val)
 {
     Value tmp = (Value) malloc(sizeof(*tmp));
     if (!tmp)
@@ -132,13 +17,13 @@ Value make_ValueInt(Integer p1)
         exit(1);
     }
     tmp->kind = is_ValueInt;
-    tmp->u.valueInt_.integer_ = p1;
+    tmp->value_int = val;
     return tmp;
 }
 
 /********************   ValueBool    ********************/
 
-Value make_ValueBool(Boolean p1)
+Value make_ValueBool(int val)
 {
     Value tmp = (Value) malloc(sizeof(*tmp));
     if (!tmp)
@@ -147,13 +32,17 @@ Value make_ValueBool(Boolean p1)
         exit(1);
     }
     tmp->kind = is_ValueBool;
-    tmp->u.valueBool_.boolean_ = p1;
+    if (val) {
+      tmp->value_bool = 1;
+    } else {
+      tmp->value_bool = 0;
+    }
     return tmp;
 }
 
 /********************   ValueString    ********************/
 
-Value make_ValueString(String p1)
+Value make_ValueString(char* val)
 {
     Value tmp = (Value) malloc(sizeof(*tmp));
     if (!tmp)
@@ -162,13 +51,13 @@ Value make_ValueString(String p1)
         exit(1);
     }
     tmp->kind = is_ValueString;
-    tmp->u.valueString_.string_ = p1;
+    tmp->value_string = val;
     return tmp;
 }
 
-/********************   ValueNonLoc    ********************/
+/********************   ValueLocal    ********************/
 
-Value make_ValueNonLoc(NonLocVar p1)
+Value make_ValueLocal(char* field_name)
 {
     Value tmp = (Value) malloc(sizeof(*tmp));
     if (!tmp)
@@ -176,154 +65,28 @@ Value make_ValueNonLoc(NonLocVar p1)
         fprintf(stderr, "Error: out of memory when allocating ValueNonLoc!\n");
         exit(1);
     }
-    tmp->kind = is_ValueNonLoc;
-    tmp->u.valueNonLoc_.nonlocvar_ = p1;
+    tmp->kind = is_ValueLocal;
+    tmp->value_local = field_name;
     return tmp;
 }
 
-/********************   Boolean_true    ********************/
+/********************   ValueNonLocal    ********************/
 
-Boolean make_Boolean_true()
+Value make_ValueNonLocal(char* section_name, char* field_name)
 {
-    Boolean tmp = (Boolean) malloc(sizeof(*tmp));
+    Value tmp = (Value) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating Boolean_true!\n");
+        fprintf(stderr, "Error: out of memory when allocating ValueNonLoc!\n");
         exit(1);
     }
-    tmp->kind = is_Boolean_true;
-    return tmp;
-}
-
-/********************   Boolean_false    ********************/
-
-Boolean make_Boolean_false()
-{
-    Boolean tmp = (Boolean) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating Boolean_false!\n");
-        exit(1);
-    }
-    tmp->kind = is_Boolean_false;
-    return tmp;
-}
-
-/********************   SimpleNonLoc    ********************/
-
-NonLocVar make_SimpleNonLoc(Ident p1)
-{
-    NonLocVar tmp = (NonLocVar) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating SimpleNonLoc!\n");
-        exit(1);
-    }
-    tmp->kind = is_SimpleNonLoc;
-    tmp->u.simpleNonLoc_.ident_ = p1;
-    return tmp;
-}
-
-/********************   NonLoc    ********************/
-
-NonLocVar make_NonLoc(Ident p1, Ident p2)
-{
-    NonLocVar tmp = (NonLocVar) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating NonLoc!\n");
-        exit(1);
-    }
-    tmp->kind = is_NonLoc;
-    tmp->u.nonLoc_.ident_1 = p1;
-    tmp->u.nonLoc_.ident_2 = p2;
+    tmp->kind = is_ValueNonLocal;
+    tmp->value_nonlocal.section_name = section_name;
+    tmp->value_nonlocal.field_name = field_name;
     return tmp;
 }
 
 /********************   Recursive Destructors    **********************/
-
-/* These free an entire abstract syntax tree
- * including all subtrees and strings.
- *
- * Will not work properly if there is sharing in the tree,
- * i.e., when some pointers are aliased.  In this case
- * it will attempt to free the same memory twice.
- */
-
-void free_SourceFile(SourceFile p)
-{
-  switch(p->kind)
-  {
-  case is_MainFile:
-    free_ListTopLevelTag(p->u.mainFile_.listtopleveltag_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing SourceFile!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_ListTopLevelTag(ListTopLevelTag listtopleveltag)
-{
-  if (listtopleveltag)
-  {
-    free_TopLevelTag(listtopleveltag->topleveltag_);
-    free_ListTopLevelTag(listtopleveltag->listtopleveltag_);
-    free(listtopleveltag);
-  }
-}
-
-void free_TopLevelTag(TopLevelTag p)
-{
-  switch(p->kind)
-  {
-  case is_FileImportTag:
-    free(p->u.fileImportTag_.string_);
-    break;
-
-  case is_SectionTag:
-    free(p->u.sectionTag_.ident_);
-    free_ListSubLevelTag(p->u.sectionTag_.listsubleveltag_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing TopLevelTag!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_ListSubLevelTag(ListSubLevelTag listsubleveltag)
-{
-  if (listsubleveltag)
-  {
-    free_SubLevelTag(listsubleveltag->subleveltag_);
-    free_ListSubLevelTag(listsubleveltag->listsubleveltag_);
-    free(listsubleveltag);
-  }
-}
-
-void free_SubLevelTag(SubLevelTag p)
-{
-  switch(p->kind)
-  {
-  case is_FieldTag:
-    free(p->u.fieldTag_.ident_);
-    free_Value(p->u.fieldTag_.value_);
-    break;
-
-  case is_InheritTag:
-    free(p->u.inheritTag_.ident_);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing SubLevelTag!\n");
-    exit(1);
-  }
-  free(p);
-}
 
 void free_Value(Value p)
 {
@@ -333,58 +96,19 @@ void free_Value(Value p)
     break;
 
   case is_ValueBool:
-    free_Boolean(p->u.valueBool_.boolean_);
     break;
 
   case is_ValueString:
-    free(p->u.valueString_.string_);
+    free(p->value_string);
     break;
 
-  case is_ValueNonLoc:
-    free_NonLocVar(p->u.valueNonLoc_.nonlocvar_);
+  case is_ValueLocal:
+    free(p->value_local);
     break;
 
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing Value!\n");
-    exit(1);
+  case is_ValueNonLocal:
+    free(p->value_nonlocal.section_name);
+    free(p->value_nonlocal.field_name);
   }
   free(p);
 }
-
-void free_Boolean(Boolean p)
-{
-  switch(p->kind)
-  {
-  case is_Boolean_true:
-    break;
-
-  case is_Boolean_false:
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing Boolean!\n");
-    exit(1);
-  }
-  free(p);
-}
-
-void free_NonLocVar(NonLocVar p)
-{
-  switch(p->kind)
-  {
-  case is_SimpleNonLoc:
-    free(p->u.simpleNonLoc_.ident_);
-    break;
-
-  case is_NonLoc:
-    free(p->u.nonLoc_.ident_1);
-    free(p->u.nonLoc_.ident_2);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when freeing NonLocVar!\n");
-    exit(1);
-  }
-  free(p);
-}
-

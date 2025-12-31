@@ -55,7 +55,7 @@
 #define YYSKELETON_NAME "yacc.c"
 
 /* Pure parsers.  */
-#define YYPURE 1
+#define YYPURE 2
 
 /* Push parsers.  */
 #define YYPUSH 0
@@ -72,7 +72,7 @@
 #define yynerrs         pseudo_xm_lgrammatica_nerrs
 
 /* First part of user prologue.  */
-#line 24 "pseudoXMLgrammatica.y"
+#line 23 "pseudoXMLgrammatica.y"
 
 /* Begin C preamble code */
 
@@ -103,48 +103,18 @@ extern char* pseudo_xm_lgrammatica_get_text(yyscan_t scanner);
 
 extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 
-/* List reversal functions. */
-ListTopLevelTag reverseListTopLevelTag(ListTopLevelTag l)
-{
-  ListTopLevelTag prev = 0;
-  ListTopLevelTag tmp = 0;
-  while (l)
-  {
-    tmp = l->listtopleveltag_;
-    l->listtopleveltag_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
-{
-  ListSubLevelTag prev = 0;
-  ListSubLevelTag tmp = 0;
-  while (l)
-  {
-    tmp = l->listsubleveltag_;
-    l->listsubleveltag_ = prev;
-    prev = l;
-    l = tmp;
-  }
-  return prev;
-}
-
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
 
 typedef struct imp_file imp_file;
 struct imp_file {
   ino_t file_ino;
-  imp_file* parent;
   imp_file* next;
 };
 
-imp_file* create_imp_file(ino_t file_ino, imp_file* parent, imp_file* next) {
+imp_file* create_imp_file(ino_t file_ino, imp_file* next) {
   imp_file* myself = (imp_file*) malloc(sizeof(*myself));
   myself->file_ino = file_ino;
-  myself->parent = parent;
   myself->next = next;
   return myself;
 }
@@ -163,12 +133,9 @@ imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
   return NULL;
 }
 
-ino_t current_file;
-
-
 /* End C preamble code */
 
-#line 172 "Parser.c"
+#line 139 "Parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -223,27 +190,25 @@ enum yysymbol_kind_t
   YYSYMBOL_TopLevelTag = 24,               /* TopLevelTag  */
   YYSYMBOL_ListSubLevelTag = 25,           /* ListSubLevelTag  */
   YYSYMBOL_SubLevelTag = 26,               /* SubLevelTag  */
-  YYSYMBOL_Value = 27,                     /* Value  */
-  YYSYMBOL_Boolean = 28,                   /* Boolean  */
-  YYSYMBOL_NonLocVar = 29                  /* NonLocVar  */
+  YYSYMBOL_Value = 27                      /* Value  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Second part of user prologue.  */
-#line 136 "pseudoXMLgrammatica.y"
+#line 95 "pseudoXMLgrammatica.y"
 
-void yyerror(YYLTYPE *loc, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section, const char *msg)
+void yyerror(YYLTYPE *loc, yyscan_t scanner, section_entry** bindings, int* reached_section, const char *msg)
 {
   fprintf(stderr, "error: %d,%d: %s at %s\n",
     loc->first_line, loc->first_column, msg, pseudo_xm_lgrammatica_get_text(scanner));
 }
 
-int yyparse(yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section);
+int yyparse(yyscan_t scanner, section_entry** bindings, int* reached_section);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 
-#line 247 "Parser.c"
+#line 212 "Parser.c"
 
 
 #ifdef short
@@ -575,11 +540,11 @@ union yyalloc
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  9
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  18
+#define YYNRULES  16
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  51
+#define YYNSTATES  49
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   275
@@ -630,8 +595,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   181,   181,   185,   186,   190,   194,   198,   199,   203,
-     204,   208,   209,   210,   211,   215,   216,   220,   221
+       0,   133,   133,   137,   138,   142,   149,   160,   161,   165,
+     169,   179,   180,   181,   182,   183,   184
 };
 #endif
 
@@ -652,7 +617,7 @@ static const char *const yytname[] =
   "_KW_import", "_KW_inherit", "_KW_name", "_KW_section", "_KW_true",
   "T_Ident", "_STRING_", "_INTEGER_", "_IDENT_", "$accept", "SourceFile",
   "ListTopLevelTag", "TopLevelTag", "ListSubLevelTag", "SubLevelTag",
-  "Value", "Boolean", "NonLocVar", YY_NULLPTR
+  "Value", YY_NULLPTR
 };
 
 static const char *
@@ -680,8 +645,7 @@ static const yytype_int8 yypact[] =
        9,     1,    11,    10,     8,   -12,    12,    15,   -12,    -3,
      -12,    13,    16,    14,    17,    19,     7,   -12,    18,    22,
       23,    25,    -4,    20,    21,   -12,   -12,   -12,   -12,    27,
-     -12,   -12,    28,    31,    33,   -12,    24,    29,   -12,    34,
-     -12
+      28,    31,    33,   -12,    24,    29,   -12,    34,   -12
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -692,21 +656,20 @@ static const yytype_int8 yydefact[] =
        3,     0,     2,     1,     0,     4,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     7,     0,     0,     5,     0,
        8,     0,     0,     0,     0,     0,     0,     6,     0,     0,
-       0,     0,     0,     0,     0,    16,    15,    13,    11,     0,
-      12,    14,     0,    17,     0,    10,     0,     0,    18,     0,
-       9
+       0,     0,     0,     0,     0,    13,    12,    14,    11,     0,
+       0,    15,     0,    10,     0,     0,    16,     0,     9
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,   -12,   -12,   -12,   -12,   -12,   -12,   -12
+     -12,   -12,   -12,   -12,   -12,   -12,   -12
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,     2,     5,    17,    20,    39,    40,    41
+       0,     1,     2,     5,    17,    20,    39
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -717,8 +680,8 @@ static const yytype_int8 yytable[] =
       34,     6,     3,    21,     7,     4,    35,     9,    22,     8,
       23,    11,    36,    10,    37,    38,    12,    14,    13,    15,
       16,    18,    19,    26,    29,     0,    27,    28,    24,    31,
-      25,    33,    32,    42,    44,    30,    46,    45,    43,    47,
-      49,    48,     0,    50
+      25,    33,    32,    40,    42,    30,    44,    43,    41,    45,
+      47,    46,     0,    48
 };
 
 static const yytype_int8 yycheck[] =
@@ -738,22 +701,21 @@ static const yytype_int8 yystos[] =
       18,     8,     7,    17,     6,     9,    12,    25,     9,     7,
       26,     6,    11,    13,    15,    14,     9,     9,     8,    17,
       17,     7,     9,     6,     4,    10,    16,    18,    19,    27,
-      28,    29,    13,    17,     7,     9,     5,     6,    17,    11,
-       9
+      13,    17,     7,     9,     5,     6,    17,    11,     9
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    21,    22,    23,    23,    24,    24,    25,    25,    26,
-      26,    27,    27,    27,    27,    28,    28,    29,    29
+      26,    27,    27,    27,    27,    27,    27
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     0,     2,     8,    11,     0,     2,    11,
-       8,     1,     1,     1,     1,     1,     1,     2,     4
+       8,     1,     1,     1,     1,     2,     4
 };
 
 
@@ -782,7 +744,7 @@ enum { YYENOMEM = -2 };
       }                                                           \
     else                                                          \
       {                                                           \
-        yyerror (&yylloc, scanner, result, bindings, reached_section, YY_("syntax error: cannot back up")); \
+        yyerror (&yylloc, scanner, bindings, reached_section, YY_("syntax error: cannot back up")); \
         YYERROR;                                                  \
       }                                                           \
   while (0)
@@ -898,7 +860,7 @@ do {                                                                      \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Kind, Value, Location, scanner, result, bindings, reached_section); \
+                  Kind, Value, Location, scanner, bindings, reached_section); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -910,13 +872,12 @@ do {                                                                      \
 
 static void
 yy_symbol_value_print (FILE *yyo,
-                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section)
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, section_entry** bindings, int* reached_section)
 {
   FILE *yyoutput = yyo;
   YY_USE (yyoutput);
   YY_USE (yylocationp);
   YY_USE (scanner);
-  YY_USE (result);
   YY_USE (bindings);
   YY_USE (reached_section);
   if (!yyvaluep)
@@ -933,14 +894,14 @@ yy_symbol_value_print (FILE *yyo,
 
 static void
 yy_symbol_print (FILE *yyo,
-                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section)
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, section_entry** bindings, int* reached_section)
 {
   YYFPRINTF (yyo, "%s %s (",
              yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
 
   YYLOCATION_PRINT (yyo, yylocationp);
   YYFPRINTF (yyo, ": ");
-  yy_symbol_value_print (yyo, yykind, yyvaluep, yylocationp, scanner, result, bindings, reached_section);
+  yy_symbol_value_print (yyo, yykind, yyvaluep, yylocationp, scanner, bindings, reached_section);
   YYFPRINTF (yyo, ")");
 }
 
@@ -974,7 +935,7 @@ do {                                                            \
 
 static void
 yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
-                 int yyrule, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section)
+                 int yyrule, yyscan_t scanner, section_entry** bindings, int* reached_section)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -988,7 +949,7 @@ yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
       yy_symbol_print (stderr,
                        YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
                        &yyvsp[(yyi + 1) - (yynrhs)],
-                       &(yylsp[(yyi + 1) - (yynrhs)]), scanner, result, bindings, reached_section);
+                       &(yylsp[(yyi + 1) - (yynrhs)]), scanner, bindings, reached_section);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -996,7 +957,7 @@ yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
 # define YY_REDUCE_PRINT(Rule)          \
 do {                                    \
   if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, yylsp, Rule, scanner, result, bindings, reached_section); \
+    yy_reduce_print (yyssp, yyvsp, yylsp, Rule, scanner, bindings, reached_section); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1037,12 +998,11 @@ int yydebug;
 
 static void
 yydestruct (const char *yymsg,
-            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section)
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, section_entry** bindings, int* reached_section)
 {
   YY_USE (yyvaluep);
   YY_USE (yylocationp);
   YY_USE (scanner);
-  YY_USE (result);
   YY_USE (bindings);
   YY_USE (reached_section);
   if (!yymsg)
@@ -1064,7 +1024,7 @@ yydestruct (const char *yymsg,
 `----------*/
 
 int
-yyparse (yyscan_t scanner, YYSTYPE *result, section_entry** bindings, int* reached_section)
+yyparse (yyscan_t scanner, section_entry** bindings, int* reached_section)
 {
 /* Lookahead token kind.  */
 int yychar;
@@ -1346,112 +1306,119 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* SourceFile: ListTopLevelTag  */
-#line 181 "pseudoXMLgrammatica.y"
-                    { (yyval.sourcefile_) = make_MainFile(reverseListTopLevelTag((yyvsp[0].listtopleveltag_))); result->sourcefile_ = (yyval.sourcefile_); }
-#line 1352 "Parser.c"
+#line 133 "pseudoXMLgrammatica.y"
+                    {}
+#line 1312 "Parser.c"
     break;
 
   case 3: /* ListTopLevelTag: %empty  */
-#line 185 "pseudoXMLgrammatica.y"
-                { (yyval.listtopleveltag_) = 0; }
-#line 1358 "Parser.c"
+#line 137 "pseudoXMLgrammatica.y"
+                {}
+#line 1318 "Parser.c"
     break;
 
   case 4: /* ListTopLevelTag: ListTopLevelTag TopLevelTag  */
-#line 186 "pseudoXMLgrammatica.y"
-                                { (yyval.listtopleveltag_) = make_ListTopLevelTag((yyvsp[0].topleveltag_), (yyvsp[-1].listtopleveltag_)); }
-#line 1364 "Parser.c"
+#line 138 "pseudoXMLgrammatica.y"
+                                {}
+#line 1324 "Parser.c"
     break;
 
   case 5: /* TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT  */
-#line 190 "pseudoXMLgrammatica.y"
+#line 142 "pseudoXMLgrammatica.y"
                                                           {
-      (yyval.topleveltag_) = make_FileImportTag((yyvsp[-4]._string), *reached_section);
+      if (*reached_section) {
+        fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+        exit(1);
+      }
       pnSourceFile((yyvsp[-4]._string), bindings);
      }
-#line 1373 "Parser.c"
+#line 1336 "Parser.c"
     break;
 
   case 6: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
-#line 194 "pseudoXMLgrammatica.y"
-                                                                                        { (yyval.topleveltag_) = make_SectionTag((yyvsp[-6]._string), reverseListSubLevelTag((yyvsp[-4].listsubleveltag_))); *reached_section = 1; reached_field = 0; *bindings = create_section_entry((yyvsp[-6]._string), *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
-#line 1379 "Parser.c"
+#line 149 "pseudoXMLgrammatica.y"
+                                                                                        {
+      *reached_section = 1;
+      reached_field = 0;
+      *bindings = create_section_entry((yyvsp[-6]._string), *bindings);
+      (*bindings)->fields = tmp_fields;
+      tmp_fields = NULL;
+      fill_sec_name(*bindings);
+    }
+#line 1349 "Parser.c"
     break;
 
   case 7: /* ListSubLevelTag: %empty  */
-#line 198 "pseudoXMLgrammatica.y"
-                { (yyval.listsubleveltag_) = 0; }
-#line 1385 "Parser.c"
+#line 160 "pseudoXMLgrammatica.y"
+                {}
+#line 1355 "Parser.c"
     break;
 
   case 8: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 199 "pseudoXMLgrammatica.y"
-                                { (yyval.listsubleveltag_) = make_ListSubLevelTag((yyvsp[0].subleveltag_), (yyvsp[-1].listsubleveltag_)); }
-#line 1391 "Parser.c"
+#line 161 "pseudoXMLgrammatica.y"
+                                {}
+#line 1361 "Parser.c"
     break;
 
   case 9: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 203 "pseudoXMLgrammatica.y"
-                                                                          { (yyval.subleveltag_) = make_FieldTag((yyvsp[-6]._string), (yyvsp[-4].value_)); reached_field = 1; tmp_fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), NULL, tmp_fields, *bindings); }
-#line 1397 "Parser.c"
+#line 165 "pseudoXMLgrammatica.y"
+                                                                          {
+      reached_field = 1;
+      tmp_fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), NULL, tmp_fields, *bindings);
+    }
+#line 1370 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 204 "pseudoXMLgrammatica.y"
-                                                           { (yyval.subleveltag_) = make_InheritTag((yyvsp[-4]._string), reached_field); tmp_fields = inherit_fields((yyvsp[-4]._string), tmp_fields, *bindings); }
-#line 1403 "Parser.c"
+#line 169 "pseudoXMLgrammatica.y"
+                                                           {
+      if (reached_field) {
+        fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+        exit(1);
+      }
+      tmp_fields = inherit_fields((yyvsp[-4]._string), tmp_fields, *bindings);
+    }
+#line 1382 "Parser.c"
     break;
 
   case 11: /* Value: _INTEGER_  */
-#line 208 "pseudoXMLgrammatica.y"
+#line 179 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1409 "Parser.c"
+#line 1388 "Parser.c"
     break;
 
-  case 12: /* Value: Boolean  */
-#line 209 "pseudoXMLgrammatica.y"
-            { (yyval.value_) = make_ValueBool((yyvsp[0].boolean_)); }
-#line 1415 "Parser.c"
+  case 12: /* Value: _KW_true  */
+#line 180 "pseudoXMLgrammatica.y"
+             { (yyval.value_) = make_ValueBool(1); }
+#line 1394 "Parser.c"
     break;
 
-  case 13: /* Value: _STRING_  */
-#line 210 "pseudoXMLgrammatica.y"
+  case 13: /* Value: _KW_false  */
+#line 181 "pseudoXMLgrammatica.y"
+              { (yyval.value_) = make_ValueBool(0); }
+#line 1400 "Parser.c"
+    break;
+
+  case 14: /* Value: _STRING_  */
+#line 182 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1421 "Parser.c"
+#line 1406 "Parser.c"
     break;
 
-  case 14: /* Value: NonLocVar  */
-#line 211 "pseudoXMLgrammatica.y"
-              { (yyval.value_) = make_ValueNonLoc((yyvsp[0].nonlocvar_)); }
-#line 1427 "Parser.c"
+  case 15: /* Value: _DOLLAR T_Ident  */
+#line 183 "pseudoXMLgrammatica.y"
+                    { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
+#line 1412 "Parser.c"
     break;
 
-  case 15: /* Boolean: _KW_true  */
-#line 215 "pseudoXMLgrammatica.y"
-             { (yyval.boolean_) = make_Boolean_true(); }
-#line 1433 "Parser.c"
-    break;
-
-  case 16: /* Boolean: _KW_false  */
-#line 216 "pseudoXMLgrammatica.y"
-              { (yyval.boolean_) = make_Boolean_false(); }
-#line 1439 "Parser.c"
-    break;
-
-  case 17: /* NonLocVar: _DOLLAR T_Ident  */
-#line 220 "pseudoXMLgrammatica.y"
-                    { (yyval.nonlocvar_) = make_SimpleNonLoc((yyvsp[0]._string)); }
-#line 1445 "Parser.c"
-    break;
-
-  case 18: /* NonLocVar: _DOLLAR T_Ident _DOT T_Ident  */
-#line 221 "pseudoXMLgrammatica.y"
-                                 { (yyval.nonlocvar_) = make_NonLoc((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1451 "Parser.c"
+  case 16: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
+#line 184 "pseudoXMLgrammatica.y"
+                                 { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
+#line 1418 "Parser.c"
     break;
 
 
-#line 1455 "Parser.c"
+#line 1422 "Parser.c"
 
       default: break;
     }
@@ -1499,7 +1466,7 @@ yyerrlab:
   if (!yyerrstatus)
     {
       ++yynerrs;
-      yyerror (&yylloc, scanner, result, bindings, reached_section, YY_("syntax error"));
+      yyerror (&yylloc, scanner, bindings, reached_section, YY_("syntax error"));
     }
 
   yyerror_range[1] = yylloc;
@@ -1517,7 +1484,7 @@ yyerrlab:
       else
         {
           yydestruct ("Error: discarding",
-                      yytoken, &yylval, &yylloc, scanner, result, bindings, reached_section);
+                      yytoken, &yylval, &yylloc, scanner, bindings, reached_section);
           yychar = YYEMPTY;
         }
     }
@@ -1573,7 +1540,7 @@ yyerrlab1:
 
       yyerror_range[1] = *yylsp;
       yydestruct ("Error: popping",
-                  YY_ACCESSING_SYMBOL (yystate), yyvsp, yylsp, scanner, result, bindings, reached_section);
+                  YY_ACCESSING_SYMBOL (yystate), yyvsp, yylsp, scanner, bindings, reached_section);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1614,7 +1581,7 @@ yyabortlab:
 | yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
 `-----------------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (&yylloc, scanner, result, bindings, reached_section, YY_("memory exhausted"));
+  yyerror (&yylloc, scanner, bindings, reached_section, YY_("memory exhausted"));
   yyresult = 2;
   goto yyreturnlab;
 
@@ -1629,7 +1596,7 @@ yyreturnlab:
          user semantic actions for why this is necessary.  */
       yytoken = YYTRANSLATE (yychar);
       yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval, &yylloc, scanner, result, bindings, reached_section);
+                  yytoken, &yylval, &yylloc, scanner, bindings, reached_section);
     }
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYABORT or YYACCEPT.  */
@@ -1638,7 +1605,7 @@ yyreturnlab:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp, yylsp, scanner, result, bindings, reached_section);
+                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp, yylsp, scanner, bindings, reached_section);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1649,37 +1616,34 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 224 "pseudoXMLgrammatica.y"
-
+#line 187 "pseudoXMLgrammatica.y"
 
 
 /* Entrypoint: parse SourceFile from file. */
-SourceFile pSourceFile(FILE *inp, section_entry** bindings)
+void pSourceFile(FILE *inp, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(inp);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 
 /* Entrypoint: parse SourceFile from filename. */
-SourceFile pnSourceFile(char* filename, section_entry** bindings)
+void pnSourceFile(char* filename, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
 
   FILE* i = fopen(filename, "r");
   if (!i) {
@@ -1695,49 +1659,48 @@ SourceFile pnSourceFile(char* filename, section_entry** bindings)
 
   if (search_imp_file(st.st_ino, imp_file_list) != NULL) {
     fprintf(stderr, "Warning: file %s imported twice. There might be an import cycle. Skipping.\n", filename);
-    return result.sourcefile_;
+    return;
   }
   printf("Adding file %s\n", filename);
-  imp_file_list = create_imp_file(st.st_ino, NULL, imp_file_list);
+  imp_file_list = create_imp_file(st.st_ino, imp_file_list);
 
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(i);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 
 /* Entrypoint: parse SourceFile from string. */
-SourceFile psSourceFile(const char *str, section_entry** bindings)
+void psSourceFile(const char *str, section_entry** bindings)
 {
   int reached_section = 0;
-  YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(0);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
-    return 0;
+    return;
   }
   YY_BUFFER_STATE buf = pseudo_xm_lgrammatica__scan_string(str, scanner);
-  int error = yyparse(scanner, &result, bindings, &reached_section);
+  int error = yyparse(scanner, bindings, &reached_section);
   pseudo_xm_lgrammatica__delete_buffer(buf, scanner);
   pseudo_xm_lgrammatica_lex_destroy(scanner);
   if (error)
   { /* Failure */
-    return 0;
+    return;
   }
   else
   { /* Success */
-    return result.sourcefile_;
+    return;
   }
 }
 

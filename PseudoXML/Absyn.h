@@ -12,148 +12,37 @@
 #include <stddef.h>  /* NULL */
 #include <string.h>  /* strdup */
 
-/* C++ Abstract Syntax Interface.*/
-
-/********************   TypeDef Section    ********************/
-
-typedef int Integer;
-typedef char Char;
-typedef double Double;
-typedef char* String;
-typedef char* Ident;
-typedef char* Ident;
-
 /********************   Forward Declarations    ***********************/
-struct SourceFile_;
-typedef struct SourceFile_ *SourceFile;
-
-struct ListTopLevelTag_;
-typedef struct ListTopLevelTag_ *ListTopLevelTag;
-
-struct TopLevelTag_;
-typedef struct TopLevelTag_ *TopLevelTag;
-
-struct ListSubLevelTag_;
-typedef struct ListSubLevelTag_ *ListSubLevelTag;
-
-struct SubLevelTag_;
-typedef struct SubLevelTag_ *SubLevelTag;
-
 struct Value_;
 typedef struct Value_ *Value;
-
-struct Boolean_;
-typedef struct Boolean_ *Boolean;
 
 struct NonLocVar_;
 typedef struct NonLocVar_ *NonLocVar;
 
 /********************   Abstract Syntax Classes    ********************/
 
-struct SourceFile_
-{
-  enum { is_MainFile } kind;
-  union
-  {
-    struct { ListTopLevelTag listtopleveltag_; } mainFile_;
-  } u;
-};
-
-SourceFile make_MainFile(ListTopLevelTag p0);
-
-struct ListTopLevelTag_
-{
-  TopLevelTag topleveltag_;
-  ListTopLevelTag listtopleveltag_;
-};
-
-ListTopLevelTag make_ListTopLevelTag(TopLevelTag p1, ListTopLevelTag p2);
-
-struct TopLevelTag_
-{
-  enum { is_FileImportTag, is_SectionTag } kind;
-  union
-  {
-    struct { String string_; } fileImportTag_;
-    struct { Ident ident_; ListSubLevelTag listsubleveltag_; } sectionTag_;
-  } u;
-};
-
-TopLevelTag make_FileImportTag(String p0, int reached_section);
-TopLevelTag make_SectionTag(Ident p0, ListSubLevelTag p1);
-
-struct ListSubLevelTag_
-{
-  SubLevelTag subleveltag_;
-  ListSubLevelTag listsubleveltag_;
-};
-
-ListSubLevelTag make_ListSubLevelTag(SubLevelTag p1, ListSubLevelTag p2);
-
-struct SubLevelTag_
-{
-  enum { is_FieldTag, is_InheritTag } kind;
-  union
-  {
-    struct { Ident ident_; Value value_; } fieldTag_;
-    struct { Ident ident_; } inheritTag_;
-  } u;
-};
-
-SubLevelTag make_FieldTag(Ident p0, Value p1);
-SubLevelTag make_InheritTag(Ident p0, int reached_field);
-
 struct Value_
 {
-  enum { is_ValueInt, is_ValueBool, is_ValueString, is_ValueNonLoc } kind;
-  union
-  {
-    struct { Integer integer_; } valueInt_;
-    struct { Boolean boolean_; } valueBool_;
-    struct { String string_; } valueString_;
-    struct { NonLocVar nonlocvar_; } valueNonLoc_;
-  } u;
+  enum { is_ValueInt, is_ValueBool, is_ValueString, is_ValueLocal, is_ValueNonLocal } kind;
+  union {
+    int value_int;
+    int value_bool;
+    char* value_string;
+    char* value_local;
+    struct { char* section_name; char* field_name; } value_nonlocal;
+  };
 };
 
-Value make_ValueInt(Integer p0);
-Value make_ValueBool(Boolean p0);
-Value make_ValueString(String p0);
-Value make_ValueNonLoc(NonLocVar p0);
+Value make_ValueInt(int val);
+Value make_ValueBool(int val);
+Value make_ValueString(char* val);
+Value make_ValueLocal(char* field_name);
+Value make_ValueNonLocal(char* section_name, char* field_name);
 
-struct Boolean_
-{
-  enum { is_Boolean_true, is_Boolean_false } kind;
-  union
-  {
-  } u;
-};
-
-Boolean make_Boolean_true(void);
-Boolean make_Boolean_false(void);
-
-struct NonLocVar_
-{
-  enum { is_SimpleNonLoc, is_NonLoc } kind;
-  union
-  {
-    struct { Ident ident_; } simpleNonLoc_;
-    struct { Ident ident_1, ident_2; } nonLoc_;
-  } u;
-};
-
-NonLocVar make_SimpleNonLoc(Ident p0);
-NonLocVar make_NonLoc(Ident p0, Ident p1);
 
 /***************************   Cloning   ******************************/
 
-SourceFile clone_SourceFile(SourceFile p);
-ListTopLevelTag clone_ListTopLevelTag(ListTopLevelTag p);
-TopLevelTag clone_TopLevelTag(TopLevelTag p);
-ListSubLevelTag clone_ListSubLevelTag(ListSubLevelTag p);
-SubLevelTag clone_SubLevelTag(SubLevelTag p);
 Value clone_Value(Value p);
-Boolean clone_Boolean(Boolean p);
-NonLocVar clone_NonLocVar(NonLocVar p);
 
 /********************   Recursive Destructors    **********************/
 
@@ -165,14 +54,6 @@ NonLocVar clone_NonLocVar(NonLocVar p);
  * it will attempt to free the same memory twice.
  */
 
-void free_SourceFile(SourceFile p);
-void free_ListTopLevelTag(ListTopLevelTag p);
-void free_TopLevelTag(TopLevelTag p);
-void free_ListSubLevelTag(ListSubLevelTag p);
-void free_SubLevelTag(SubLevelTag p);
 void free_Value(Value p);
-void free_Boolean(Boolean p);
-void free_NonLocVar(NonLocVar p);
-
 
 #endif
