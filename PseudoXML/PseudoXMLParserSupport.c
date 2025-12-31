@@ -7,6 +7,7 @@
 section_entry* create_section_entry(char* name, section_entry* next) {
   section_entry* myself = (section_entry*) malloc(sizeof(*myself));
   myself->name = name;
+  myself->prev = NULL;
   myself->next = next;
   myself->fields = NULL;
   return myself;
@@ -15,11 +16,12 @@ section_entry* create_section_entry(char* name, section_entry* next) {
 field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings) {
   field_entry* myself = (field_entry*) malloc(sizeof(*myself));
 
-  myself->field_name = name;
+  myself->name = name;
   myself->section = section;
+  myself->prev = NULL;
   myself->next = next;
+  myself->references = NULL;
   myself->backlinks = NULL;
-  myself->value = value;
 
   char* ref_name;
   char* ref_sec_name;
@@ -50,8 +52,8 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
         fprintf(stderr, "Error: field references an unknown field.\n");
         exit(1);
       }
-      myself->copy_from = ref;
-      myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
+      myself->references = ref;
+      myself->references->backlinks = create_backlink(myself, myself->references->backlinks);
       break;
     case is_ValueNonLocal:
       myself->kind = is_NonLocal;
@@ -62,11 +64,27 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
         fprintf(stderr, "Error: field references an unknown field.\n");
         exit(1);
       }
-      myself->copy_from = ref;
-      myself->copy_from->backlinks = create_backlink(myself, myself->copy_from->backlinks);
+      myself->references = ref;
+      myself->references->backlinks = create_backlink(myself, myself->references->backlinks);
       break;
   }
   return myself;
+}
+
+field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from, field_entry* next) {
+  field_entry* myself = (field_entry*) malloc(sizeof(*myself));
+
+  myself->name = name;
+  myself->section = section;
+  myself->kind = is_Inherited;
+  myself->prev = NULL;
+  myself->next = next;
+  myself->references = inherited_from;
+  myself->backlinks = NULL;
+
+  myself->references->backlinks = create_backlink(myself, myself->references->backlinks);
+
+  return myself; 
 }
 
 backlink* create_backlink(field_entry* ptr, backlink* next) {
@@ -79,7 +97,7 @@ backlink* create_backlink(field_entry* ptr, backlink* next) {
 field_entry* search_bindings_local(char* field_name, field_entry* fields) {
   field_entry* current_field = fields;
   while (current_field) {
-    if (strcmp(current_field->field_name, field_name) == 0) {
+    if (strcmp(current_field->name, field_name) == 0) {
       return current_field;
     }
     current_field = current_field->next;
@@ -94,7 +112,7 @@ field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_nam
   while (current_section) {
     current_field = current_section->fields;
     while (current_field) {
-      if (strcmp(current_field->field_name, field_name) == 0) {
+      if (strcmp(current_field->name, field_name) == 0) {
         return current_field;
       }
       current_field = current_field->next;
@@ -127,10 +145,9 @@ field_entry* inherit_fields(char* section_name, field_entry* next, section_entry
   }
 
   field_entry* current_field = current_section->fields;
-  field_entry* new_field = next;;
+  field_entry* new_field = next;
   while (current_field) {
-    new_field = create_field_entry(current_field->field_name, current_field->value, NULL, new_field, bindings);
-    current_field->backlinks = create_backlink(new_field, current_field->backlinks);
+    new_field = create_field_entry_inherited(current_field->name, NULL, current_field, new_field);
     current_field = current_field->next;
   }
   return new_field;
@@ -146,30 +163,30 @@ void print_bindings(section_entry* bindings) {
     while (f) {
       switch(f->kind) {
         case is_Integer:
-          printf("\tField %s: %i {", f->field_name, f->value_Integer);
+          printf("\tField %s: %i {", f->name, f->value_Integer);
           break;
         case is_Boolean:
           if (f->value_Boolean == 0) {
-              printf("\tField %s: false {", f->field_name);
+              printf("\tField %s: false {", f->name);
           } else {
-              printf("\tField %s: true {", f->field_name);
+              printf("\tField %s: true {", f->name);
           }
           break;
         case is_String:
-          printf("\tField %s: %s {", f->field_name, f->value_String);
+          printf("\tField %s: %s {", f->name, f->value_String);
           break;
         case is_Local:
-          printf("\tField %s -> Field %s {", f->field_name, f->copy_from->field_name);
+          printf("\tField %s -> Field %s {", f->name, f->references->name);
           break;
         case is_NonLocal:
-          printf("\tField %s -> Section %s Field %s {", f->field_name, f->copy_from->section->name, f->copy_from->field_name);
+          printf("\tField %s -> Section %s Field %s {", f->name, f->references->section->name, f->references->name);
           break;
         case is_Inherited:
-          break;
+          printf("\tField %s => Section %s Field %s {", f->name, f->references->section->name, f->references->name);
         }
         backlink* current_backlink = f->backlinks;
         while(current_backlink) {
-          printf("(Section %s, Field %s), ", current_backlink->ptr->section->name, current_backlink->ptr->field_name);
+          printf("(Section %s, Field %s), ", current_backlink->ptr->section->name, current_backlink->ptr->name);
           current_backlink = current_backlink->next;
         }
         printf("}\n");

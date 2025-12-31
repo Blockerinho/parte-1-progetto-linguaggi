@@ -23,7 +23,7 @@ typedef struct NonLocVar_ *NonLocVar;
 
 struct Value_
 {
-  enum { is_ValueInt, is_ValueBool, is_ValueString, is_ValueLocal, is_ValueNonLocal } kind;
+  enum { is_ValueInt, is_ValueBool, is_ValueString, is_ValueLocal, is_ValueNonLocal} kind;
   union {
     int value_int;
     int value_bool;

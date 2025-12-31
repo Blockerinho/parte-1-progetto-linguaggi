@@ -109,6 +109,7 @@ void free_Value(Value p)
   case is_ValueNonLocal:
     free(p->value_nonlocal.section_name);
     free(p->value_nonlocal.field_name);
+    break;
   }
   free(p);
 }

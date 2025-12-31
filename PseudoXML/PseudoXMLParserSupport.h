@@ -20,23 +20,23 @@ section_entry* create_section_entry(char* name, section_entry* next);
 
 /* lista concatenata di campi */
 struct field_entry {
-  char* field_name;
+  char* name;
+  section_entry* section;
   enum { is_Integer, is_Boolean, is_String, is_Local, is_NonLocal, is_Inherited } kind;
   union {
     int value_Integer;
     int value_Boolean;
     char* value_String;
   };
-  Value value;
-  section_entry* section;
   field_entry* prev;
   field_entry* next;
-  field_entry* inherit_from;
-  field_entry* copy_from;
+  field_entry* references;
   backlink* backlinks;
 };
 
 field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings);
+
+field_entry* create_field_inherited(char* name, section_entry* section, field_entry* inherited_from, field_entry* next);
 
 /* risoluzione dei valori */ 
 field_entry* resolve_value(field_entry* field);
