@@ -164,6 +164,14 @@ ListSubLevelTag
 SubLevelTag
   : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT {
       reached_field = 1;
+      field_entry* current_field = tmp_fields;
+      while (current_field) {
+        if (!strcmp(current_field->name, $5)) {
+          fprintf(stderr, "Warning: field %s has already been defined in the current section.\n", $5);
+          break;
+        }
+        current_field = current_field->next;
+      }
       tmp_fields = create_field_entry($5, $7, NULL, tmp_fields, *bindings);
     }
   | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT {

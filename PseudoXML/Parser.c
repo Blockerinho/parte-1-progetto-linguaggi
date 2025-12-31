@@ -596,7 +596,7 @@ static const yytype_int8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,   133,   133,   137,   138,   142,   149,   160,   161,   165,
-     169,   179,   180,   181,   182,   183,   184
+     177,   187,   188,   189,   190,   191,   192
 };
 #endif
 
@@ -1364,13 +1364,21 @@ yyreduce:
 #line 165 "pseudoXMLgrammatica.y"
                                                                           {
       reached_field = 1;
+      field_entry* current_field = tmp_fields;
+      while (current_field) {
+        if (!strcmp(current_field->name, (yyvsp[-6]._string))) {
+          fprintf(stderr, "Warning: field %s has already been defined in the current section.\n", (yyvsp[-6]._string));
+          break;
+        }
+        current_field = current_field->next;
+      }
       tmp_fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), NULL, tmp_fields, *bindings);
     }
-#line 1370 "Parser.c"
+#line 1378 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 169 "pseudoXMLgrammatica.y"
+#line 177 "pseudoXMLgrammatica.y"
                                                            {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
@@ -1378,47 +1386,47 @@ yyreduce:
       }
       tmp_fields = inherit_fields((yyvsp[-4]._string), tmp_fields, *bindings);
     }
-#line 1382 "Parser.c"
+#line 1390 "Parser.c"
     break;
 
   case 11: /* Value: _INTEGER_  */
-#line 179 "pseudoXMLgrammatica.y"
+#line 187 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1388 "Parser.c"
+#line 1396 "Parser.c"
     break;
 
   case 12: /* Value: _KW_true  */
-#line 180 "pseudoXMLgrammatica.y"
+#line 188 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueBool(1); }
-#line 1394 "Parser.c"
+#line 1402 "Parser.c"
     break;
 
   case 13: /* Value: _KW_false  */
-#line 181 "pseudoXMLgrammatica.y"
+#line 189 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueBool(0); }
-#line 1400 "Parser.c"
+#line 1408 "Parser.c"
     break;
 
   case 14: /* Value: _STRING_  */
-#line 182 "pseudoXMLgrammatica.y"
+#line 190 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1406 "Parser.c"
+#line 1414 "Parser.c"
     break;
 
   case 15: /* Value: _DOLLAR T_Ident  */
-#line 183 "pseudoXMLgrammatica.y"
+#line 191 "pseudoXMLgrammatica.y"
                     { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
-#line 1412 "Parser.c"
+#line 1420 "Parser.c"
     break;
 
   case 16: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
-#line 184 "pseudoXMLgrammatica.y"
+#line 192 "pseudoXMLgrammatica.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1418 "Parser.c"
+#line 1426 "Parser.c"
     break;
 
 
-#line 1422 "Parser.c"
+#line 1430 "Parser.c"
 
       default: break;
     }
@@ -1616,7 +1624,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 187 "pseudoXMLgrammatica.y"
+#line 195 "pseudoXMLgrammatica.y"
 
 
 /* Entrypoint: parse SourceFile from file. */
