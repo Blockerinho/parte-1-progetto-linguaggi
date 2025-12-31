@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
 #include "Parser.h"
@@ -78,6 +81,38 @@ ListSubLevelTag reverseListSubLevelTag(ListSubLevelTag l)
 
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
+
+typedef struct imp_file imp_file;
+struct imp_file {
+  ino_t file_ino;
+  imp_file* parent;
+  imp_file* next;
+};
+
+imp_file* create_imp_file(ino_t file_ino, imp_file* parent, imp_file* next) {
+  imp_file* myself = (imp_file*) malloc(sizeof(*myself));
+  myself->file_ino = file_ino;
+  myself->parent = parent;
+  myself->next = next;
+  return myself;
+}
+
+imp_file* imp_file_list = NULL;
+
+/* check if a file has already been imported */
+imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
+  imp_file* current_file = list;
+  while (current_file) {
+    if (current_file->file_ino == file_ino) {
+      return current_file;
+    }
+    current_file = current_file->next;
+  } 
+  return NULL;
+}
+
+ino_t current_file;
+
 
 /* End C preamble code */
 %}
@@ -154,13 +189,7 @@ ListTopLevelTag
 TopLevelTag
   : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT {
       $$ = make_FileImportTag($4, *reached_section);
-      FILE* i = fopen($4, "r");
-      if (!i) {
-        fprintf(stderr, "Error opening imported file %s\n", $4);
-        perror("Error");
-        exit(1);
-      }
-      pSourceFile(i, bindings);
+      pnSourceFile($4, bindings);
      }
   | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT { $$ = make_SectionTag($5, reverseListSubLevelTag($7)); *reached_section = 1; reached_field = 0; *bindings = create_section_entry($5, *bindings); (*bindings)->fields = tmp_fields; tmp_fields = NULL; fill_sec_name(*bindings);}
 ;
@@ -201,6 +230,48 @@ SourceFile pSourceFile(FILE *inp, section_entry** bindings)
   int reached_section = 0;
   YYSTYPE result;
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(inp);
+  if (!scanner) {
+    fprintf(stderr, "Failed to initialize lexer.\n");
+    return 0;
+  }
+  int error = yyparse(scanner, &result, bindings, &reached_section);
+  pseudo_xm_lgrammatica_lex_destroy(scanner);
+  if (error)
+  { /* Failure */
+    return 0;
+  }
+  else
+  { /* Success */
+    return result.sourcefile_;
+  }
+}
+
+/* Entrypoint: parse SourceFile from filename. */
+SourceFile pnSourceFile(char* filename, section_entry** bindings)
+{
+  int reached_section = 0;
+  YYSTYPE result;
+
+  FILE* i = fopen(filename, "r");
+  if (!i) {
+    fprintf(stderr, "Error opening imported file %s\n", filename);
+    perror("Error");
+    exit(1);
+  }
+  struct stat st;
+  if (stat(filename, &st) != 0) {
+    fprintf(stderr, "Could not stat file %s\n", filename);
+    exit(1);
+  }
+
+  if (search_imp_file(st.st_ino, imp_file_list) != NULL) {
+    fprintf(stderr, "Warning: file %s imported twice. There might be an import cycle. Skipping.\n", filename);
+    return result.sourcefile_;
+  }
+  printf("Adding file %s\n", filename);
+  imp_file_list = create_imp_file(st.st_ino, NULL, imp_file_list);
+
+  yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(i);
   if (!scanner) {
     fprintf(stderr, "Failed to initialize lexer.\n");
     return 0;

@@ -44,17 +44,18 @@ int main(int argc, char ** argv)
     }
   }
 
+  section_entry* bindings = NULL;
   if (filename) {
-    input = fopen(filename, "r");
+    parse_tree = pnSourceFile(filename, &bindings);
     if (!input) {
       usage();
       exit(1);
     }
   }
-  else input = stdin;
+  else {
+    parse_tree = pSourceFile(stdin, &bindings);
+  }
   /* The default entry point is used. For other options see Parser.h */
-  section_entry* bindings = NULL;
-  parse_tree = pSourceFile(input, &bindings);
 
 
   if (parse_tree)

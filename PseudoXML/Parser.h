@@ -9,5 +9,6 @@
 
 SourceFile  pSourceFile(FILE *inp, section_entry** bindings);
 SourceFile psSourceFile(const char *str, section_entry** bindings);
+SourceFile pnSourceFile(char *filename, section_entry** bindings);
 
 #endif
