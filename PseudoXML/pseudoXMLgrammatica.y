@@ -147,6 +147,14 @@ TopLevelTag
       pnSourceFile($4, bindings);
      }
   | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
+      section_entry* current_section = *bindings;
+      while (current_section) {
+        if (!strcmp(current_section->name, $5)) {
+          fprintf(stderr, "Warning: section %s has already been defined.\n", $5);
+          break;
+        }
+        current_section = current_section->next;
+      }
       *reached_section = 1;
       reached_field = 0;
       *bindings = create_section_entry($5, *bindings);

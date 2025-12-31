@@ -595,8 +595,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   133,   133,   137,   138,   142,   149,   160,   161,   165,
-     177,   187,   188,   189,   190,   191,   192
+       0,   133,   133,   137,   138,   142,   149,   168,   169,   173,
+     185,   195,   196,   197,   198,   199,   200
 };
 #endif
 
@@ -1338,6 +1338,14 @@ yyreduce:
   case 6: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
 #line 149 "pseudoXMLgrammatica.y"
                                                                                         {
+      section_entry* current_section = *bindings;
+      while (current_section) {
+        if (!strcmp(current_section->name, (yyvsp[-6]._string))) {
+          fprintf(stderr, "Warning: section %s has already been defined.\n", (yyvsp[-6]._string));
+          break;
+        }
+        current_section = current_section->next;
+      }
       *reached_section = 1;
       reached_field = 0;
       *bindings = create_section_entry((yyvsp[-6]._string), *bindings);
@@ -1345,23 +1353,23 @@ yyreduce:
       tmp_fields = NULL;
       fill_sec_name(*bindings);
     }
-#line 1349 "Parser.c"
+#line 1357 "Parser.c"
     break;
 
   case 7: /* ListSubLevelTag: %empty  */
-#line 160 "pseudoXMLgrammatica.y"
+#line 168 "pseudoXMLgrammatica.y"
                 {}
-#line 1355 "Parser.c"
+#line 1363 "Parser.c"
     break;
 
   case 8: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 161 "pseudoXMLgrammatica.y"
+#line 169 "pseudoXMLgrammatica.y"
                                 {}
-#line 1361 "Parser.c"
+#line 1369 "Parser.c"
     break;
 
   case 9: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 165 "pseudoXMLgrammatica.y"
+#line 173 "pseudoXMLgrammatica.y"
                                                                           {
       reached_field = 1;
       field_entry* current_field = tmp_fields;
@@ -1374,11 +1382,11 @@ yyreduce:
       }
       tmp_fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), NULL, tmp_fields, *bindings);
     }
-#line 1378 "Parser.c"
+#line 1386 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 177 "pseudoXMLgrammatica.y"
+#line 185 "pseudoXMLgrammatica.y"
                                                            {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
@@ -1386,47 +1394,47 @@ yyreduce:
       }
       tmp_fields = inherit_fields((yyvsp[-4]._string), tmp_fields, *bindings);
     }
-#line 1390 "Parser.c"
+#line 1398 "Parser.c"
     break;
 
   case 11: /* Value: _INTEGER_  */
-#line 187 "pseudoXMLgrammatica.y"
+#line 195 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1396 "Parser.c"
+#line 1404 "Parser.c"
     break;
 
   case 12: /* Value: _KW_true  */
-#line 188 "pseudoXMLgrammatica.y"
+#line 196 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueBool(1); }
-#line 1402 "Parser.c"
+#line 1410 "Parser.c"
     break;
 
   case 13: /* Value: _KW_false  */
-#line 189 "pseudoXMLgrammatica.y"
+#line 197 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueBool(0); }
-#line 1408 "Parser.c"
+#line 1416 "Parser.c"
     break;
 
   case 14: /* Value: _STRING_  */
-#line 190 "pseudoXMLgrammatica.y"
+#line 198 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1414 "Parser.c"
+#line 1422 "Parser.c"
     break;
 
   case 15: /* Value: _DOLLAR T_Ident  */
-#line 191 "pseudoXMLgrammatica.y"
+#line 199 "pseudoXMLgrammatica.y"
                     { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
-#line 1420 "Parser.c"
+#line 1428 "Parser.c"
     break;
 
   case 16: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
-#line 192 "pseudoXMLgrammatica.y"
+#line 200 "pseudoXMLgrammatica.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1426 "Parser.c"
+#line 1434 "Parser.c"
     break;
 
 
-#line 1430 "Parser.c"
+#line 1438 "Parser.c"
 
       default: break;
     }
@@ -1624,7 +1632,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 195 "pseudoXMLgrammatica.y"
+#line 203 "pseudoXMLgrammatica.y"
 
 
 /* Entrypoint: parse SourceFile from file. */
