@@ -52,6 +52,7 @@ extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
+section_entry* new_section;
 
 typedef struct imp_file imp_file;
 struct imp_file {
@@ -146,7 +147,7 @@ TopLevelTag
       }
       pnSourceFile($4, bindings);
      }
-  | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
+  | _LT _KW_section _KW_name  _EQ T_Ident { new_section = create_section_entry($5, *bindings); } _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
       section_entry* current_section = *bindings;
       while (current_section) {
         if (!strcmp(current_section->name, $5)) {
@@ -157,10 +158,7 @@ TopLevelTag
       }
       *reached_section = 1;
       reached_field = 0;
-      *bindings = create_section_entry($5, *bindings);
-      (*bindings)->fields = tmp_fields;
-      tmp_fields = NULL;
-      fill_sec_name(*bindings);
+      *bindings = new_section;
     }
 ;
 
@@ -172,22 +170,28 @@ ListSubLevelTag
 SubLevelTag
   : _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT {
       reached_field = 1;
-      field_entry* current_field = tmp_fields;
+      field_entry* current_field = new_section->fields;
       while (current_field) {
         if (!strcmp(current_field->name, $5)) {
-          fprintf(stderr, "Warning: field %s has already been defined in the current section.\n", $5);
-          break;
+          if (current_field->kind == is_Inherited) {
+            fprintf(stderr, "Warning: overwriting field %s in section %s that was inherited from section %s.\n", $5, new_section->name, current_field->references->section->name);
+            delete_field_entry(current_field);
+            break;
+          } else {
+            fprintf(stderr, "Warning: field %s has already been defined in section %s.\n", $5, new_section->name);
+            break;
+          }
         }
         current_field = current_field->next;
       }
-      tmp_fields = create_field_entry($5, $7, NULL, tmp_fields, *bindings);
+      new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
     }
   | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
         exit(1);
       }
-      tmp_fields = inherit_fields($4, tmp_fields, *bindings);
+      new_section->fields = inherit_fields($4, new_section, *bindings);
     }
 ;
 

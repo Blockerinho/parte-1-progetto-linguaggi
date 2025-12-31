@@ -46,15 +46,18 @@ void print_resolved_value(field_entry* resolved);
 /* lista concatenata di riferimenti a campi */
 struct backlink {
  field_entry* ptr;
+ backlink* prev;
  backlink* next;
 };
 
 backlink* create_backlink(field_entry* ptr, backlink* next);
 
-void fill_sec_name(section_entry* section);
+void delete_field_entry(field_entry* field);
+
+void delete_backlink(backlink* backlink, field_entry* field);
 
 
-field_entry* inherit_fields(char* section_name, field_entry* next, section_entry* bindings);
+field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings);
 
 /* cancellazioni */
 void delete_field(field_entry* field);

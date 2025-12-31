@@ -80,14 +80,19 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
   return myself;
 }
 
-field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from, field_entry* next) {
+field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from) {
   field_entry* myself = (field_entry*) malloc(sizeof(*myself));
 
   myself->name = name;
   myself->section = section;
   myself->kind = is_Inherited;
   myself->prev = NULL;
-  myself->next = next;
+  myself->next = section->fields;
+
+  if (myself->next) {
+    myself->next->prev = myself;
+  }
+  
   myself->references = inherited_from;
   myself->backlinks = NULL;
 
@@ -99,7 +104,12 @@ field_entry* create_field_entry_inherited(char* name, section_entry* section, fi
 backlink* create_backlink(field_entry* ptr, backlink* next) {
   backlink* myself = (backlink*) malloc(sizeof(*myself));
   myself->ptr = ptr;
+  myself->prev = NULL;
   myself->next = next;
+
+  if (myself->next) {
+    myself->next->prev = myself;
+  }
   return myself;
 }
 
@@ -131,16 +141,51 @@ field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_nam
   return NULL;
 }
 
-/* per ogni field appena aggiunto, aggiungi il riferimento alla sezione a cui appartiene */
-void fill_sec_name(section_entry* section) {
-  field_entry* current_field = section->fields;
-  while (current_field) {
-    current_field->section = section;
-    current_field = current_field->next;
+void delete_backlink(backlink* backlink, field_entry* field) {
+  if (backlink->prev) {
+    backlink->prev->next = backlink->next;
+  } else {
+    field->backlinks = backlink->next;
+  }
+  if (backlink->next) {
+    backlink->next->prev = backlink->prev;
   }
 }
 
-field_entry* inherit_fields(char* section_name, field_entry* next, section_entry* bindings) {
+void delete_field_entry(field_entry* field) {
+  if (field->prev) {
+    field->prev->next = field->next;
+  } else {
+    field->section->fields = field->next;
+  }
+  if (field->next) {
+    field->next->prev = field->prev;
+  }
+
+  if (field->references) {
+    backlink* remote_backlink = field->references->backlinks;
+    while (remote_backlink) {
+      if (remote_backlink->ptr == field) {
+        delete_backlink(remote_backlink, field->references);
+        break;
+      }
+      remote_backlink = remote_backlink->next;
+    }
+  }
+
+  backlink* current_backlink = field->backlinks;
+  while (current_backlink) {
+    if (current_backlink->ptr) {
+      delete_field_entry(current_backlink->ptr);
+    } else {
+      fprintf(stderr, "Errore: backlink vuoto in Sezione %s, campo %s", field->section->name, field->name);
+      exit(1);
+    }
+    current_backlink = current_backlink->next;
+  }
+}
+
+field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings) {
   section_entry* current_section = bindings;
   while (current_section) {
     if (strcmp(current_section->name, section_name) == 0) {
@@ -154,12 +199,11 @@ field_entry* inherit_fields(char* section_name, field_entry* next, section_entry
   }
 
   field_entry* current_field = current_section->fields;
-  field_entry* new_field = next;
   while (current_field) {
-    new_field = create_field_entry_inherited(current_field->name, NULL, current_field, new_field);
+    section->fields = create_field_entry_inherited(current_field->name, section, current_field);
     current_field = current_field->next;
   }
-  return new_field;
+  return section->fields;
 }
 
 

@@ -105,6 +105,7 @@ extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 
 int reached_field = 0;
 field_entry* tmp_fields = NULL;
+section_entry* new_section;
 
 typedef struct imp_file imp_file;
 struct imp_file {
@@ -135,7 +136,7 @@ imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
 
 /* End C preamble code */
 
-#line 139 "Parser.c"
+#line 140 "Parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -188,15 +189,16 @@ enum yysymbol_kind_t
   YYSYMBOL_SourceFile = 22,                /* SourceFile  */
   YYSYMBOL_ListTopLevelTag = 23,           /* ListTopLevelTag  */
   YYSYMBOL_TopLevelTag = 24,               /* TopLevelTag  */
-  YYSYMBOL_ListSubLevelTag = 25,           /* ListSubLevelTag  */
-  YYSYMBOL_SubLevelTag = 26,               /* SubLevelTag  */
-  YYSYMBOL_Value = 27                      /* Value  */
+  YYSYMBOL_25_1 = 25,                      /* $@1  */
+  YYSYMBOL_ListSubLevelTag = 26,           /* ListSubLevelTag  */
+  YYSYMBOL_SubLevelTag = 27,               /* SubLevelTag  */
+  YYSYMBOL_Value = 28                      /* Value  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Second part of user prologue.  */
-#line 95 "pseudoXMLgrammatica.y"
+#line 96 "pseudoXMLgrammatica.y"
 
 void yyerror(YYLTYPE *loc, yyscan_t scanner, section_entry** bindings, int* reached_section, const char *msg)
 {
@@ -208,7 +210,7 @@ int yyparse(yyscan_t scanner, section_entry** bindings, int* reached_section);
 
 extern int yylex(YYSTYPE *lvalp, YYLTYPE *llocp, yyscan_t scanner);
 
-#line 212 "Parser.c"
+#line 214 "Parser.c"
 
 
 #ifdef short
@@ -540,11 +542,11 @@ union yyalloc
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  16
+#define YYNRULES  17
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  49
+#define YYNSTATES  50
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   275
@@ -595,8 +597,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   133,   133,   137,   138,   142,   149,   168,   169,   173,
-     185,   195,   196,   197,   198,   199,   200
+       0,   134,   134,   138,   139,   143,   150,   150,   166,   167,
+     171,   189,   199,   200,   201,   202,   203,   204
 };
 #endif
 
@@ -616,8 +618,8 @@ static const char *const yytname[] =
   "_DOT", "_SLASH", "_LT", "_EQ", "_GT", "_KW_false", "_KW_field",
   "_KW_import", "_KW_inherit", "_KW_name", "_KW_section", "_KW_true",
   "T_Ident", "_STRING_", "_INTEGER_", "_IDENT_", "$accept", "SourceFile",
-  "ListTopLevelTag", "TopLevelTag", "ListSubLevelTag", "SubLevelTag",
-  "Value", YY_NULLPTR
+  "ListTopLevelTag", "TopLevelTag", "$@1", "ListSubLevelTag",
+  "SubLevelTag", "Value", YY_NULLPTR
 };
 
 static const char *
@@ -642,10 +644,10 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 static const yytype_int8 yypact[] =
 {
      -12,     2,    -2,   -12,   -11,   -12,     0,    -7,    -5,     3,
-       9,     1,    11,    10,     8,   -12,    12,    15,   -12,    -3,
-     -12,    13,    16,    14,    17,    19,     7,   -12,    18,    22,
-      23,    25,    -4,    20,    21,   -12,   -12,   -12,   -12,    27,
-      28,    31,    33,   -12,    24,    29,   -12,    34,   -12
+       9,     1,    11,   -12,     7,    12,    13,   -12,   -12,    16,
+      -3,   -12,     5,    10,    17,    18,    20,     8,   -12,    14,
+      22,    21,    26,    -4,    23,    24,   -12,   -12,   -12,   -12,
+      27,    28,    30,    32,   -12,    25,    29,   -12,    34,   -12
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -654,22 +656,22 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        3,     0,     2,     1,     0,     4,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     7,     0,     0,     5,     0,
-       8,     0,     0,     0,     0,     0,     0,     6,     0,     0,
-       0,     0,     0,     0,     0,    13,    12,    14,    11,     0,
-       0,    15,     0,    10,     0,     0,    16,     0,     9
+       0,     0,     0,     6,     0,     0,     0,     8,     5,     0,
+       0,     9,     0,     0,     0,     0,     0,     0,     7,     0,
+       0,     0,     0,     0,     0,     0,    14,    13,    15,    12,
+       0,     0,    16,     0,    11,     0,     0,    17,     0,    10
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,   -12,   -12,   -12,   -12,   -12
+     -12,   -12,   -12,   -12,   -12,   -12,   -12,   -12
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,     2,     5,    17,    20,    39
+       0,     1,     2,     5,    15,    19,    21,    40
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -677,20 +679,20 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      34,     6,     3,    21,     7,     4,    35,     9,    22,     8,
-      23,    11,    36,    10,    37,    38,    12,    14,    13,    15,
-      16,    18,    19,    26,    29,     0,    27,    28,    24,    31,
-      25,    33,    32,    40,    42,    30,    44,    43,    41,    45,
-      47,    46,     0,    48
+      35,     6,     3,    22,     7,     4,    36,     9,    23,     8,
+      24,    11,    37,    10,    38,    39,    12,    14,    13,    16,
+      25,    17,    18,    20,    26,    30,    27,    28,    29,    32,
+      33,    31,    34,     0,    43,    45,    41,    44,    46,     0,
+      48,    42,    47,    49
 };
 
 static const yytype_int8 yycheck[] =
 {
        4,    12,     0,     6,    15,     7,    10,    14,    11,     9,
-      13,     8,    16,    18,    18,    19,     7,     6,    17,     9,
-      12,     9,     7,     9,    17,    -1,     9,     8,    15,     7,
-      14,     6,     9,    13,     7,    17,     5,     9,    17,     6,
-      11,    17,    -1,     9
+      13,     8,    16,    18,    18,    19,     7,     6,    17,    12,
+      15,     9,     9,     7,    14,    17,     9,     9,     8,     7,
+       9,    17,     6,    -1,     7,     5,    13,     9,     6,    -1,
+      11,    17,    17,     9
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -698,24 +700,24 @@ static const yytype_int8 yycheck[] =
 static const yytype_int8 yystos[] =
 {
        0,    22,    23,     0,     7,    24,    12,    15,     9,    14,
-      18,     8,     7,    17,     6,     9,    12,    25,     9,     7,
-      26,     6,    11,    13,    15,    14,     9,     9,     8,    17,
-      17,     7,     9,     6,     4,    10,    16,    18,    19,    27,
-      13,    17,     7,     9,     5,     6,    17,    11,     9
+      18,     8,     7,    17,     6,    25,    12,     9,     9,    26,
+       7,    27,     6,    11,    13,    15,    14,     9,     9,     8,
+      17,    17,     7,     9,     6,     4,    10,    16,    18,    19,
+      28,    13,    17,     7,     9,     5,     6,    17,    11,     9
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    21,    22,    23,    23,    24,    24,    25,    25,    26,
-      26,    27,    27,    27,    27,    27,    27
+       0,    21,    22,    23,    23,    24,    25,    24,    26,    26,
+      27,    27,    28,    28,    28,    28,    28,    28
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     0,     2,     8,    11,     0,     2,    11,
-       8,     1,     1,     1,     1,     2,     4
+       0,     2,     1,     0,     2,     8,     0,    12,     0,     2,
+      11,     8,     1,     1,     1,     1,     2,     4
 };
 
 
@@ -1306,25 +1308,25 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* SourceFile: ListTopLevelTag  */
-#line 133 "pseudoXMLgrammatica.y"
+#line 134 "pseudoXMLgrammatica.y"
                     {}
-#line 1312 "Parser.c"
+#line 1314 "Parser.c"
     break;
 
   case 3: /* ListTopLevelTag: %empty  */
-#line 137 "pseudoXMLgrammatica.y"
+#line 138 "pseudoXMLgrammatica.y"
                 {}
-#line 1318 "Parser.c"
+#line 1320 "Parser.c"
     break;
 
   case 4: /* ListTopLevelTag: ListTopLevelTag TopLevelTag  */
-#line 138 "pseudoXMLgrammatica.y"
+#line 139 "pseudoXMLgrammatica.y"
                                 {}
-#line 1324 "Parser.c"
+#line 1326 "Parser.c"
     break;
 
   case 5: /* TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT  */
-#line 142 "pseudoXMLgrammatica.y"
+#line 143 "pseudoXMLgrammatica.y"
                                                           {
       if (*reached_section) {
         fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
@@ -1332,109 +1334,118 @@ yyreduce:
       }
       pnSourceFile((yyvsp[-4]._string), bindings);
      }
-#line 1336 "Parser.c"
+#line 1338 "Parser.c"
     break;
 
-  case 6: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
-#line 149 "pseudoXMLgrammatica.y"
-                                                                                        {
+  case 6: /* $@1: %empty  */
+#line 150 "pseudoXMLgrammatica.y"
+                                          { new_section = create_section_entry((yyvsp[0]._string), *bindings); }
+#line 1344 "Parser.c"
+    break;
+
+  case 7: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident $@1 _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
+#line 150 "pseudoXMLgrammatica.y"
+                                                                                                                                                {
       section_entry* current_section = *bindings;
       while (current_section) {
-        if (!strcmp(current_section->name, (yyvsp[-6]._string))) {
-          fprintf(stderr, "Warning: section %s has already been defined.\n", (yyvsp[-6]._string));
+        if (!strcmp(current_section->name, (yyvsp[-7]._string))) {
+          fprintf(stderr, "Warning: section %s has already been defined.\n", (yyvsp[-7]._string));
           break;
         }
         current_section = current_section->next;
       }
       *reached_section = 1;
       reached_field = 0;
-      *bindings = create_section_entry((yyvsp[-6]._string), *bindings);
-      (*bindings)->fields = tmp_fields;
-      tmp_fields = NULL;
-      fill_sec_name(*bindings);
+      *bindings = new_section;
     }
-#line 1357 "Parser.c"
+#line 1362 "Parser.c"
     break;
 
-  case 7: /* ListSubLevelTag: %empty  */
-#line 168 "pseudoXMLgrammatica.y"
+  case 8: /* ListSubLevelTag: %empty  */
+#line 166 "pseudoXMLgrammatica.y"
                 {}
-#line 1363 "Parser.c"
+#line 1368 "Parser.c"
     break;
 
-  case 8: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 169 "pseudoXMLgrammatica.y"
+  case 9: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
+#line 167 "pseudoXMLgrammatica.y"
                                 {}
-#line 1369 "Parser.c"
+#line 1374 "Parser.c"
     break;
 
-  case 9: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 173 "pseudoXMLgrammatica.y"
+  case 10: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
+#line 171 "pseudoXMLgrammatica.y"
                                                                           {
       reached_field = 1;
-      field_entry* current_field = tmp_fields;
+      field_entry* current_field = new_section->fields;
       while (current_field) {
         if (!strcmp(current_field->name, (yyvsp[-6]._string))) {
-          fprintf(stderr, "Warning: field %s has already been defined in the current section.\n", (yyvsp[-6]._string));
-          break;
+          if (current_field->kind == is_Inherited) {
+            fprintf(stderr, "Warning: overwriting field %s in section %s that was inherited from section %s.\n", (yyvsp[-6]._string), new_section->name, current_field->references->section->name);
+            delete_field_entry(current_field);
+            break;
+          } else {
+            fprintf(stderr, "Warning: field %s has already been defined in section %s.\n", (yyvsp[-6]._string), new_section->name);
+            break;
+          }
         }
         current_field = current_field->next;
       }
-      tmp_fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), NULL, tmp_fields, *bindings);
+      new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
     }
-#line 1386 "Parser.c"
+#line 1397 "Parser.c"
     break;
 
-  case 10: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 185 "pseudoXMLgrammatica.y"
+  case 11: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
+#line 189 "pseudoXMLgrammatica.y"
                                                            {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
         exit(1);
       }
-      tmp_fields = inherit_fields((yyvsp[-4]._string), tmp_fields, *bindings);
+      new_section->fields = inherit_fields((yyvsp[-4]._string), new_section, *bindings);
     }
-#line 1398 "Parser.c"
+#line 1409 "Parser.c"
     break;
 
-  case 11: /* Value: _INTEGER_  */
-#line 195 "pseudoXMLgrammatica.y"
-              { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1404 "Parser.c"
-    break;
-
-  case 12: /* Value: _KW_true  */
-#line 196 "pseudoXMLgrammatica.y"
-             { (yyval.value_) = make_ValueBool(1); }
-#line 1410 "Parser.c"
-    break;
-
-  case 13: /* Value: _KW_false  */
-#line 197 "pseudoXMLgrammatica.y"
-              { (yyval.value_) = make_ValueBool(0); }
-#line 1416 "Parser.c"
-    break;
-
-  case 14: /* Value: _STRING_  */
-#line 198 "pseudoXMLgrammatica.y"
-             { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1422 "Parser.c"
-    break;
-
-  case 15: /* Value: _DOLLAR T_Ident  */
+  case 12: /* Value: _INTEGER_  */
 #line 199 "pseudoXMLgrammatica.y"
-                    { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
-#line 1428 "Parser.c"
+              { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
+#line 1415 "Parser.c"
     break;
 
-  case 16: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
+  case 13: /* Value: _KW_true  */
 #line 200 "pseudoXMLgrammatica.y"
+             { (yyval.value_) = make_ValueBool(1); }
+#line 1421 "Parser.c"
+    break;
+
+  case 14: /* Value: _KW_false  */
+#line 201 "pseudoXMLgrammatica.y"
+              { (yyval.value_) = make_ValueBool(0); }
+#line 1427 "Parser.c"
+    break;
+
+  case 15: /* Value: _STRING_  */
+#line 202 "pseudoXMLgrammatica.y"
+             { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
+#line 1433 "Parser.c"
+    break;
+
+  case 16: /* Value: _DOLLAR T_Ident  */
+#line 203 "pseudoXMLgrammatica.y"
+                    { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
+#line 1439 "Parser.c"
+    break;
+
+  case 17: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
+#line 204 "pseudoXMLgrammatica.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1434 "Parser.c"
+#line 1445 "Parser.c"
     break;
 
 
-#line 1438 "Parser.c"
+#line 1449 "Parser.c"
 
       default: break;
     }
@@ -1632,7 +1643,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 203 "pseudoXMLgrammatica.y"
+#line 207 "pseudoXMLgrammatica.y"
 
 
 /* Entrypoint: parse SourceFile from file. */
