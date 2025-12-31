@@ -10,6 +10,11 @@ section_entry* create_section_entry(char* name, section_entry* next) {
   myself->prev = NULL;
   myself->next = next;
   myself->fields = NULL;
+
+  if (myself->next) {
+    myself->next->prev = myself;
+  }
+
   return myself;
 }
 
@@ -22,6 +27,10 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
   myself->next = next;
   myself->references = NULL;
   myself->backlinks = NULL;
+
+  if (myself->next) {
+    myself->next->prev = myself;
+  }
 
   char* ref_name;
   char* ref_sec_name;
