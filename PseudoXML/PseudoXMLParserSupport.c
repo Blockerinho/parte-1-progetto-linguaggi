@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
@@ -53,12 +54,12 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
       myself->kind = is_Local;
       ref_name = value->value_local;
       if (strcmp(ref_name, name) == 0) {
-        fprintf(stderr, "Error: a field cannot reference itself.\n");
+        fprintf(stderr, "Error: section %s: field %s references itself.\n", section->name, name);
         exit(1);
       }
       ref = search_bindings_local(ref_name, next);
       if (!ref) {
-        fprintf(stderr, "Error: field references an unknown field.\n");
+        fprintf(stderr, "Error: section %s: field %s references unknown local field %s.\n", section->name, name, ref_name);
         exit(1);
       }
       myself->references = ref;
@@ -70,12 +71,15 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
       ref_name = value->value_nonlocal.field_name;
       ref = search_bindings_nonlocal(bindings, ref_sec_name, ref_name);
       if (!ref) {
-        fprintf(stderr, "Error: field references an unknown field.\n");
+        fprintf(stderr, "Error: section %s: field %s references an unknown nonlocal field %s in section %s.\n", section->name, name, ref_name, ref_sec_name);
         exit(1);
       }
       myself->references = ref;
       myself->references->backlinks = create_backlink(myself, myself->references->backlinks);
       break;
+    default:
+      fprintf(stderr, "Error: section %s: invalid field kind for field %s.\n", section->name, name);
+      exit(1);
   }
   return myself;
 }
@@ -86,10 +90,10 @@ field_entry* create_field_entry_inherited(char* name, section_entry* section, fi
     if (strcmp(current_field->name, name) == 0) {
       if (current_field->kind == is_Inherited) {
         fprintf(stderr, "Error: section %s: field %s inherited from section %s conflicts with field %s inherited from section %s.\n", section->name, name, inherited_from->section->name, current_field->name, current_field->references->section->name);
-        return section->fields;
+        return section->fields; // non aggiungere il nuovo campo in caso di conflitto
       } else {
-        fprintf(stderr, "Error: inherited field %s comes after normal field %s in section %s.\n", name, current_field->name, section->name);
-        exit(1);
+        // non dovrebbe accadere perché c'è già un controllo nel parser
+        fprintf(stderr, "Error: inherited field %s comes after normal field %s in section %s.\n", name, current_field->name, section->name);        exit(1);
       }
     }
     current_field = current_field->next;
@@ -115,6 +119,27 @@ field_entry* create_field_entry_inherited(char* name, section_entry* section, fi
   return myself; 
 }
 
+field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings) {
+  section_entry* ancestor_section = bindings;
+  while (ancestor_section) {
+    if (strcmp(ancestor_section->name, section_name) == 0) {
+      break;
+    }
+    ancestor_section = ancestor_section->next;
+  }
+  if (!ancestor_section) {
+    fprintf(stderr, "Error: section %s: inherit action references unknown section %s.\n", section->name, section_name);
+    exit(1);
+  }
+
+  field_entry* ancestor_field = ancestor_section->fields;
+  while (ancestor_field) {
+    section->fields = create_field_entry_inherited(ancestor_field->name, section, ancestor_field);
+    ancestor_field = ancestor_field->next;
+  }
+  return section->fields;
+}
+
 backlink* create_backlink(field_entry* ptr, backlink* next) {
   backlink* myself = (backlink*) malloc(sizeof(*myself));
   myself->ptr = ptr;
@@ -125,6 +150,24 @@ backlink* create_backlink(field_entry* ptr, backlink* next) {
     myself->next->prev = myself;
   }
   return myself;
+}
+
+imp_file* create_imp_file(ino_t file_ino, imp_file* next) {
+  imp_file* myself = (imp_file*) malloc(sizeof(*myself));
+  myself->file_ino = file_ino;
+  myself->next = next;
+  return myself;
+}
+
+imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
+  imp_file* current_file = list;
+  while (current_file) {
+    if (current_file->file_ino == file_ino) {
+      return current_file;
+    }
+    current_file = current_file->next;
+  } 
+  return NULL;
 }
 
 field_entry* search_bindings_local(char* field_name, field_entry* fields) {
@@ -138,7 +181,6 @@ field_entry* search_bindings_local(char* field_name, field_entry* fields) {
   return NULL;  
 }
 
-/* dato un nome di sezione e un nome di field, cerca la sezione con quel nome e quindi il field con quel nome */
 field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_name, char* field_name) {
   section_entry* current_section = bindings;
   field_entry* current_field;
@@ -155,15 +197,41 @@ field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_nam
   return NULL;
 }
 
-void delete_backlink(backlink* backlink, field_entry* field) {
-  if (backlink->prev) {
-    backlink->prev->next = backlink->next;
-  } else {
-    field->backlinks = backlink->next;
+section_entry* delete_section_entry(section_entry* section) {
+  section_entry* new_first = section;
+  while (new_first) {
+    new_first = new_first->prev;
   }
-  if (backlink->next) {
-    backlink->next->prev = backlink->prev;
+  if (new_first == section) {
+    new_first = section->next;
   }
+  
+  if (section->prev) {
+    section->prev->next = section->next;
+  }
+  if (section->next) {
+    section->next->prev = section->prev;
+  }
+
+  while (section->fields) {
+    delete_field_entry(section->fields);
+  }
+
+  free(section);
+  return new_first;
+}
+
+section_entry* delete_section_by_name(char* section_name, section_entry* bindings) {
+  section_entry* section_to_delete = bindings;
+  section_entry* new_first;
+  while (section_to_delete) {
+    if (strcmp(section_to_delete->name, section_name) == 0) {
+      new_first = delete_section_entry(section_to_delete);
+      break;
+    }
+    section_to_delete = section_to_delete->next;
+  }
+  return new_first;
 }
 
 void delete_field_entry(field_entry* field) {
@@ -176,6 +244,8 @@ void delete_field_entry(field_entry* field) {
     field->next->prev = field->prev;
   }
 
+  // Se ho un riferimento a un altro campo, cancella il backlink
+  // corrispondente in tale campo.
   if (field->references) {
     backlink* remote_backlink = field->references->backlinks;
     while (remote_backlink) {
@@ -187,39 +257,50 @@ void delete_field_entry(field_entry* field) {
     }
   }
 
+  // Cancella ricorsivamente i campi che si riferiscono a me.
   backlink* current_backlink = field->backlinks;
   while (current_backlink) {
     if (current_backlink->ptr) {
       delete_field_entry(current_backlink->ptr);
     } else {
-      fprintf(stderr, "Errore: backlink vuoto in Sezione %s, campo %s", field->section->name, field->name);
+      fprintf(stderr, "Errore: backlink vuoto in Sezione %s, campo %s", field->section->name, field->name); // non dovrebbe succedere
       exit(1);
     }
     current_backlink = current_backlink->next;
   }
+
+  free(field);
 }
 
-field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings) {
-  section_entry* ancestor_section = bindings;
-  while (ancestor_section) {
-    if (strcmp(ancestor_section->name, section_name) == 0) {
-      break;
+void delete_field_by_name(char* field_name, char* section_name, section_entry* bindings) {
+  section_entry* section_to_delete = bindings;
+  field_entry* field_to_delete;
+  while (section_to_delete) {
+    if (strcmp(section_to_delete->name, section_name) == 0) {
+      field_to_delete = section_to_delete->fields;
+      while (field_to_delete) {
+        if (strcmp(field_to_delete->name, field_name) == 0) {
+          delete_field_entry(field_to_delete);
+          return;
+        }
+        field_to_delete = field_to_delete->next;
+      }
     }
-    ancestor_section = ancestor_section->next;
+    section_to_delete = section_to_delete->next;
   }
-  if (!ancestor_section) {
-    fprintf(stderr, "Inherit action references unknown section.\n");
-    exit(1);
-  }
-
-  field_entry* ancestor_field = ancestor_section->fields;
-  while (ancestor_field) {
-    section->fields = create_field_entry_inherited(ancestor_field->name, section, ancestor_field);
-    ancestor_field = ancestor_field->next;
-  }
-  return section->fields;
 }
 
+void delete_backlink(backlink* backlink, field_entry* field) {
+  if (backlink->prev) {
+    backlink->prev->next = backlink->next;
+  } else {
+    field->backlinks = backlink->next;
+  }
+  if (backlink->next) {
+    backlink->next->prev = backlink->prev;
+  }
+  free(backlink);
+}
 
 void print_bindings(section_entry* bindings) {
   printf("Pretty printing struttura dati dei bindings:\n\n");
@@ -251,6 +332,7 @@ void print_bindings(section_entry* bindings) {
         case is_Inherited:
           printf("\tField %s => Section %s Field %s {", f->name, f->references->section->name, f->references->name);
         }
+
         backlink* current_backlink = f->backlinks;
         while(current_backlink) {
           printf("(Section %s, Field %s), ", current_backlink->ptr->section->name, current_backlink->ptr->name);

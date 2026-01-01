@@ -1,14 +1,16 @@
 #ifndef PARSUP_H
 #define PARSUP_H
 
+#include <sys/types.h>
+
 #include "Absyn.h"
 
-/* strutture dati per mantenere i binding */
 typedef struct section_entry section_entry;
 typedef struct field_entry field_entry;
 typedef struct backlink backlink;
 
-/* lista concatenata di sezioni */
+/* Rappresenta una sezione. I puntatori prev e next permettono di formare una
+   lista concatenata. */
 struct section_entry {
   char* name;
   section_entry* prev;
@@ -16,9 +18,14 @@ struct section_entry {
   field_entry* fields;
 };
 
+/* Crea una sezione vuota dato il nome e il prossimo elemento della lista. */
 section_entry* create_section_entry(char* name, section_entry* next);
 
-/* lista concatenata di campi */
+/* Rappresenta un campo. I puntatori prev e next permettono di formare una
+   lista concatenata. Il puntatore references punta al campo a cui questo
+   campo fa riferimento (con la notazione $ oppure perché ereditato), e ha
+   senso solo se kind è is_Local, is_NonLocal o is_Inherited. Il puntatore
+   backlinks contiene i campi che si riferiscono a questo campo. */
 struct field_entry {
   char* name;
   section_entry* section;
@@ -34,17 +41,21 @@ struct field_entry {
   backlink* backlinks;
 };
 
+/* Crea un campo dato nome, valore, sezione di appartenenza, lista degli altri
+   campi, e bindings creati fino a quel momento (da usare nel caso di campi
+   che si riferiscono ad altri campi in altre sezioni). */
 field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings);
 
-field_entry* create_field_inherited(char* name, section_entry* section, field_entry* inherited_from, field_entry* next);
+/* Crea un campo ereditato dato nome, sezione di appartenenza, campo da cui
+   eredita. */
+field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from);
 
-/* risoluzione dei valori */ 
-field_entry* resolve_field(field_entry* field);
-Value resolve_value(field_entry* field);
-Value get_resolved_value(section_entry* sections,const char* section_name,const char* field_name);
-void print_resolved_value(field_entry* resolved);
+/* Dato il nome di una sezione, la sezione corrente e i bindings, eredita
+   tutti i campi della sezione con quel nome nella sezione corrente. */
+field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings);
 
-/* lista concatenata di riferimenti a campi */
+/* Riferimento a un campo. I puntatori prev e next permettono di formare una
+   lista concatenata. */
 struct backlink {
  field_entry* ptr;
  backlink* prev;
@@ -53,25 +64,54 @@ struct backlink {
 
 backlink* create_backlink(field_entry* ptr, backlink* next);
 
-void delete_field_entry(field_entry* field);
+/* Rappresenta un file importato, con l'inode. */
+typedef struct imp_file imp_file;
+struct imp_file {
+  ino_t file_ino;
+  imp_file* next;
+};
 
-void delete_backlink(backlink* backlink, field_entry* field);
+imp_file* create_imp_file(ino_t file_ino, imp_file* next);
+
+imp_file* search_imp_file(ino_t file_ino, imp_file* list);
 
 
-field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings);
-
-/* cancellazioni */
-void delete_field(field_entry* field);
-int delete_field_by_name(section_entry* section, const char* field_name);
-void delete_section(section_entry* section);
-section_entry* delete_section_by_name(section_entry* sections, const char* section_name);
-void free_all_sections(section_entry* sections);
-
-/* dati i fields della sezione corrente e un nome di field, cerca il field con quel nome tra i field dati */
+/* Dato il nome di un campo e una lista di campi, cerca il campo con quel nome
+   nella lista. */
 field_entry* search_bindings_local(char* field_name, field_entry* fields);
 
-/* dato un nome di sezione e un nome di field, cerca la sezione con quel nome e quindi il field con quel nome */
+/* Dato il nome di una sezione, il nome di un campo e i bindings, cerca il
+   campo con quel nome. */
 field_entry* search_bindings_nonlocal(section_entry* bindings, char* section_name, char* field_name);
 
+
+
+
+/* risoluzione dei valori */ 
+field_entry* resolve_field(field_entry* field);
+Value resolve_value(field_entry* field);
+Value get_resolved_value(section_entry* sections,const char* section_name,const char* field_name);
+void print_resolved_value(field_entry* resolved);
+
+/* Cancella una sezione, ritorna la nuova sezione all'inizio della lista. */
+section_entry* delete_section_entry(section_entry* section);
+section_entry* delete_section_by_name(char* section_name, section_entry* bindings);
+
+/* Cancella un campo */
+void delete_field_entry(field_entry* field);
+void delete_field_by_name(char* field_name, char* section_name, section_entry* bindings);
+
+/* Cancella un backlink */
+void delete_backlink(backlink* backlink, field_entry* field);
+
+void free_all_sections(section_entry* sections);
+
+
+/* Printing dei bindings per debugging.
+   La notazione -> significa che il campo si riferisce a un altro campo locale
+   o non locale.
+   La notazione => significa che il campo eredita da un'altra sezione.
+   Tra { } c'è la lista dei backlink.
+ */
 void print_bindings(section_entry* bindings);
 #endif
