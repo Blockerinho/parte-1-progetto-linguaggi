@@ -598,7 +598,7 @@ static const yytype_int8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,   134,   134,   138,   139,   143,   150,   150,   166,   167,
-     171,   189,   199,   200,   201,   202,   203,   204
+     171,   192,   202,   203,   204,   205,   206,   207
 };
 #endif
 
@@ -1383,21 +1383,24 @@ yyreduce:
           if (current_field->kind == is_Inherited) {
             fprintf(stderr, "Warning: overwriting field %s in section %s that was inherited from section %s.\n", (yyvsp[-6]._string), new_section->name, current_field->references->section->name);
             delete_field_entry(current_field);
+            new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
             break;
           } else {
-            fprintf(stderr, "Warning: field %s has already been defined in section %s.\n", (yyvsp[-6]._string), new_section->name);
+            fprintf(stderr, "Warning: field %s has already been defined in section %s, skipping it.\n", (yyvsp[-6]._string), new_section->name);
             break;
           }
         }
         current_field = current_field->next;
       }
-      new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
+      if (!current_field) {
+        new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
+      }
     }
-#line 1397 "Parser.c"
+#line 1400 "Parser.c"
     break;
 
   case 11: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 189 "pseudoXMLgrammatica.y"
+#line 192 "pseudoXMLgrammatica.y"
                                                            {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
@@ -1405,47 +1408,47 @@ yyreduce:
       }
       new_section->fields = inherit_fields((yyvsp[-4]._string), new_section, *bindings);
     }
-#line 1409 "Parser.c"
+#line 1412 "Parser.c"
     break;
 
   case 12: /* Value: _INTEGER_  */
-#line 199 "pseudoXMLgrammatica.y"
+#line 202 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1415 "Parser.c"
+#line 1418 "Parser.c"
     break;
 
   case 13: /* Value: _KW_true  */
-#line 200 "pseudoXMLgrammatica.y"
+#line 203 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueBool(1); }
-#line 1421 "Parser.c"
+#line 1424 "Parser.c"
     break;
 
   case 14: /* Value: _KW_false  */
-#line 201 "pseudoXMLgrammatica.y"
+#line 204 "pseudoXMLgrammatica.y"
               { (yyval.value_) = make_ValueBool(0); }
-#line 1427 "Parser.c"
+#line 1430 "Parser.c"
     break;
 
   case 15: /* Value: _STRING_  */
-#line 202 "pseudoXMLgrammatica.y"
+#line 205 "pseudoXMLgrammatica.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1433 "Parser.c"
+#line 1436 "Parser.c"
     break;
 
   case 16: /* Value: _DOLLAR T_Ident  */
-#line 203 "pseudoXMLgrammatica.y"
+#line 206 "pseudoXMLgrammatica.y"
                     { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
-#line 1439 "Parser.c"
+#line 1442 "Parser.c"
     break;
 
   case 17: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
-#line 204 "pseudoXMLgrammatica.y"
+#line 207 "pseudoXMLgrammatica.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1445 "Parser.c"
+#line 1448 "Parser.c"
     break;
 
 
-#line 1449 "Parser.c"
+#line 1452 "Parser.c"
 
       default: break;
     }
@@ -1643,7 +1646,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 207 "pseudoXMLgrammatica.y"
+#line 210 "pseudoXMLgrammatica.y"
 
 
 /* Entrypoint: parse SourceFile from file. */

@@ -176,15 +176,18 @@ SubLevelTag
           if (current_field->kind == is_Inherited) {
             fprintf(stderr, "Warning: overwriting field %s in section %s that was inherited from section %s.\n", $5, new_section->name, current_field->references->section->name);
             delete_field_entry(current_field);
+            new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
             break;
           } else {
-            fprintf(stderr, "Warning: field %s has already been defined in section %s.\n", $5, new_section->name);
+            fprintf(stderr, "Warning: field %s has already been defined in section %s, skipping it.\n", $5, new_section->name);
             break;
           }
         }
         current_field = current_field->next;
       }
-      new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
+      if (!current_field) {
+        new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
+      }
     }
   | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT {
       if (reached_field) {
