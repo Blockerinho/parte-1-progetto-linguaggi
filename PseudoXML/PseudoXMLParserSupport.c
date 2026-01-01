@@ -81,6 +81,20 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
 }
 
 field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from) {
+  field_entry* current_field = section->fields;
+  while (current_field) {
+    if (strcmp(current_field->name, name) == 0) {
+      if (current_field->kind == is_Inherited) {
+        fprintf(stderr, "Error: section %s: field %s inherited from section %s conflicts with field %s inherited from section %s.\n", section->name, name, inherited_from->section->name, current_field->name, current_field->references->section->name);
+        return section->fields;
+      } else {
+        fprintf(stderr, "Error: inherited field %s comes after normal field %s in section %s.\n", name, current_field->name, section->name);
+        exit(1);
+      }
+    }
+    current_field = current_field->next;
+  }
+  
   field_entry* myself = (field_entry*) malloc(sizeof(*myself));
 
   myself->name = name;
@@ -186,22 +200,22 @@ void delete_field_entry(field_entry* field) {
 }
 
 field_entry* inherit_fields(char* section_name, section_entry* section, section_entry* bindings) {
-  section_entry* current_section = bindings;
-  while (current_section) {
-    if (strcmp(current_section->name, section_name) == 0) {
+  section_entry* ancestor_section = bindings;
+  while (ancestor_section) {
+    if (strcmp(ancestor_section->name, section_name) == 0) {
       break;
     }
-    current_section = current_section->next;
+    ancestor_section = ancestor_section->next;
   }
-  if (!current_section) {
+  if (!ancestor_section) {
     fprintf(stderr, "Inherit action references unknown section.\n");
     exit(1);
   }
 
-  field_entry* current_field = current_section->fields;
-  while (current_field) {
-    section->fields = create_field_entry_inherited(current_field->name, section, current_field);
-    current_field = current_field->next;
+  field_entry* ancestor_field = ancestor_section->fields;
+  while (ancestor_field) {
+    section->fields = create_field_entry_inherited(ancestor_field->name, section, ancestor_field);
+    ancestor_field = ancestor_field->next;
   }
   return section->fields;
 }

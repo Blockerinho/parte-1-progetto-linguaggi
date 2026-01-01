@@ -1381,7 +1381,7 @@ yyreduce:
       while (current_field) {
         if (!strcmp(current_field->name, (yyvsp[-6]._string))) {
           if (current_field->kind == is_Inherited) {
-            fprintf(stderr, "Warning: overwriting field %s in section %s that was inherited from section %s.\n", (yyvsp[-6]._string), new_section->name, current_field->references->section->name);
+            fprintf(stderr, "Info: overwriting field %s in section %s that was inherited from section %s.\n", (yyvsp[-6]._string), new_section->name, current_field->references->section->name);
             delete_field_entry(current_field);
             new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
             break;
