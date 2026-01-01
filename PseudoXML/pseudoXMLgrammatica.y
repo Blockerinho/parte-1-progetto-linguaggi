@@ -151,8 +151,8 @@ TopLevelTag
       section_entry* current_section = *bindings;
       while (current_section) {
         if (!strcmp(current_section->name, $5)) {
-          fprintf(stderr, "Warning: section %s has already been defined.\n", $5);
-          break;
+          fprintf(stderr, "Error: section %s has already been defined.\n", $5);
+          exit(1);
         }
         current_section = current_section->next;
       }

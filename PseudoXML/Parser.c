@@ -1349,8 +1349,8 @@ yyreduce:
       section_entry* current_section = *bindings;
       while (current_section) {
         if (!strcmp(current_section->name, (yyvsp[-7]._string))) {
-          fprintf(stderr, "Warning: section %s has already been defined.\n", (yyvsp[-7]._string));
-          break;
+          fprintf(stderr, "Error: section %s has already been defined.\n", (yyvsp[-7]._string));
+          exit(1);
         }
         current_section = current_section->next;
       }
