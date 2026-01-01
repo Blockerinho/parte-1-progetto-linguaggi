@@ -9,7 +9,7 @@ FLEX_OPTS = -Ppseudo_xm_lgrammatica_
 BISON = bison
 BISON_OPTS = -t -ppseudo_xm_lgrammatica_
 
-OBJS = Absyn.o Buffer.o Lexer.o Parser.o PseudoXMLParserSupport.o
+OBJS = Absyn.o Buffer.o Lexer.o Parser.o PseudoXMLParserSupport.o refSolver.o
 
 .PHONY : clean distclean
 
@@ -44,6 +44,9 @@ Lexer.o : Lexer.c Bison.h
 
 Parser.o : Parser.c Absyn.h Bison.h
 	${CC} ${CCFLAGS} -c Parser.c
+
+refSolver.o : refSolver.c PseudoXMLParserSupport.h
+	${CC} ${CCFLAGS} -c refSolver.c
 
 PseudoXMLParserSupport.o : PseudoXMLParserSupport.c PseudoXMLParserSupport.h Absyn.h
 	${CC} ${CCFLAGS} -c PseudoXMLParserSupport.c

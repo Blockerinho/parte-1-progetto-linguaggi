@@ -39,8 +39,9 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
 field_entry* create_field_inherited(char* name, section_entry* section, field_entry* inherited_from, field_entry* next);
 
 /* risoluzione dei valori */ 
-field_entry* resolve_value(field_entry* field);
-field_entry* get_resolved_value(section_entry* sections,const char* section_name,const char* field_name);
+field_entry* resolve_field(field_entry* field);
+Value resolve_value(field_entry* field);
+Value get_resolved_value(section_entry* sections,const char* section_name,const char* field_name);
 void print_resolved_value(field_entry* resolved);
 
 /* lista concatenata di riferimenti a campi */
