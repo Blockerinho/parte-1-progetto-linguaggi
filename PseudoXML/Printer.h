@@ -62,6 +62,9 @@ void bufAppendS(const char *s);
 void bufAppendC(const char c);
 void bufReset(void);
 void resizeBuffer(void);
+void flush_comments_up_to(int line_limit);
+void print_inline_comments(int current_line);
+void flush_remaining_comments()
 
 #endif
 
