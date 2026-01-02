@@ -1,7 +1,10 @@
 #ifndef PARSUP_H
 #define PARSUP_H
 
+
+#ifdef DETECT_IMPORT_CYCLES
 #include <sys/types.h>
+#endif
 
 #include "Absyn.h"
 
@@ -64,6 +67,7 @@ struct backlink {
 
 backlink* create_backlink(field_entry* ptr, backlink* next);
 
+#ifdef DETECT_IMPORT_CYCLES
 /* Rappresenta un file importato, con l'inode. */
 typedef struct imp_file imp_file;
 struct imp_file {
@@ -74,6 +78,7 @@ struct imp_file {
 imp_file* create_imp_file(ino_t file_ino, imp_file* next);
 
 imp_file* search_imp_file(ino_t file_ino, imp_file* list);
+#endif
 
 
 /* Dato il nome di un campo e una lista di campi, cerca il campo con quel nome

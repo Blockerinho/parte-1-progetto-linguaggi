@@ -152,6 +152,7 @@ backlink* create_backlink(field_entry* ptr, backlink* next) {
   return myself;
 }
 
+#ifdef DETECT_IMPORT_CYCLES
 imp_file* create_imp_file(ino_t file_ino, imp_file* next) {
   imp_file* myself = (imp_file*) malloc(sizeof(*myself));
   myself->file_ino = file_ino;
@@ -169,6 +170,7 @@ imp_file* search_imp_file(ino_t file_ino, imp_file* list) {
   } 
   return NULL;
 }
+#endif
 
 field_entry* search_bindings_local(char* field_name, field_entry* fields) {
   field_entry* current_field = fields;

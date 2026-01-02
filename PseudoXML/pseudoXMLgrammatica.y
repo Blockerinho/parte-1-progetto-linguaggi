@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef DETECT_IMPORT_CYCLES
 #include <sys/stat.h>
+#endif
 
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
@@ -48,7 +50,9 @@ extern yyscan_t pseudo_xm_lgrammatica__initialize_lexer(FILE * inp);
 int reached_field = 0; // abbiamo incontrato un tag field nella sezione corrente?
 section_entry* new_section;
 
+#ifdef DETECT_IMPORT_CYCLES
 imp_file* imp_file_list = NULL;
+#endif
 
 /* End C preamble code */
 %}
@@ -206,6 +210,7 @@ void pnSourceFile(char* filename, section_entry** bindings)
   int reached_section = 0;
 
   FILE* i = fopen(filename, "r");
+  #ifdef DETECT_IMPORT_CYCLES
   if (!i) {
     fprintf(stderr, "Error opening imported file %s\n", filename);
     perror("Error");
@@ -222,6 +227,7 @@ void pnSourceFile(char* filename, section_entry** bindings)
     return;
   }
   imp_file_list = create_imp_file(st.st_ino, imp_file_list);
+  #endif
 
   yyscan_t scanner = pseudo_xm_lgrammatica__initialize_lexer(i);
   if (!scanner) {
