@@ -1,0 +1,5 @@
+# Questo è un file di libreria importato
+<section name="CommonConfig">
+    <field name="default_port"> 8080 </field>
+    <field name="max_retries"> 5 </field>
+</section>
