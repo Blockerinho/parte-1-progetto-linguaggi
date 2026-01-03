@@ -72,7 +72,7 @@
 #define yynerrs         pseudo_xm_lgrammatica_nerrs
 
 /* First part of user prologue.  */
-#line 19 "pseudoXMLgrammatica.y"
+#line 19 "Parser.y"
 
 /* Begin C preamble code */
 
@@ -84,7 +84,7 @@
 #endif
 
 #include "Absyn.h"
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 #include "Parser.h"
 
 #define YYMAXDEPTH 10000000
@@ -175,7 +175,7 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Second part of user prologue.  */
-#line 69 "pseudoXMLgrammatica.y"
+#line 69 "Parser.y"
 
 void yyerror(YYLTYPE *loc, yyscan_t scanner, section_entry** bindings, int* reached_section, const char *msg)
 {
@@ -1285,25 +1285,25 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* SourceFile: ListTopLevelTag  */
-#line 107 "pseudoXMLgrammatica.y"
+#line 107 "Parser.y"
                     {}
 #line 1291 "Parser.c"
     break;
 
   case 3: /* ListTopLevelTag: %empty  */
-#line 111 "pseudoXMLgrammatica.y"
+#line 111 "Parser.y"
                 {}
 #line 1297 "Parser.c"
     break;
 
   case 4: /* ListTopLevelTag: ListTopLevelTag TopLevelTag  */
-#line 112 "pseudoXMLgrammatica.y"
+#line 112 "Parser.y"
                                 {}
 #line 1303 "Parser.c"
     break;
 
   case 5: /* TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT  */
-#line 116 "pseudoXMLgrammatica.y"
+#line 116 "Parser.y"
                                                           {
       if (*reached_section) {
         fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
@@ -1315,13 +1315,13 @@ yyreduce:
     break;
 
   case 6: /* $@1: %empty  */
-#line 123 "pseudoXMLgrammatica.y"
+#line 123 "Parser.y"
                                           { new_section = create_section_entry((yyvsp[0]._string), *bindings); }
 #line 1321 "Parser.c"
     break;
 
   case 7: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident $@1 _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
-#line 123 "pseudoXMLgrammatica.y"
+#line 123 "Parser.y"
                                                                                                                                                 {
       section_entry* current_section = *bindings;
       while (current_section) {
@@ -1339,19 +1339,19 @@ yyreduce:
     break;
 
   case 8: /* ListSubLevelTag: %empty  */
-#line 139 "pseudoXMLgrammatica.y"
+#line 139 "Parser.y"
                 {}
 #line 1345 "Parser.c"
     break;
 
   case 9: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 140 "pseudoXMLgrammatica.y"
+#line 140 "Parser.y"
                                 {}
 #line 1351 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 144 "pseudoXMLgrammatica.y"
+#line 144 "Parser.y"
                                                                           {
       reached_field = 1;
 
@@ -1378,7 +1378,7 @@ yyreduce:
     break;
 
   case 11: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 166 "pseudoXMLgrammatica.y"
+#line 166 "Parser.y"
                                                            {
       if (reached_field) {
         fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
@@ -1390,37 +1390,37 @@ yyreduce:
     break;
 
   case 12: /* Value: _INTEGER_  */
-#line 176 "pseudoXMLgrammatica.y"
+#line 176 "Parser.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
 #line 1396 "Parser.c"
     break;
 
   case 13: /* Value: _KW_true  */
-#line 177 "pseudoXMLgrammatica.y"
+#line 177 "Parser.y"
              { (yyval.value_) = make_ValueBool(1); }
 #line 1402 "Parser.c"
     break;
 
   case 14: /* Value: _KW_false  */
-#line 178 "pseudoXMLgrammatica.y"
+#line 178 "Parser.y"
               { (yyval.value_) = make_ValueBool(0); }
 #line 1408 "Parser.c"
     break;
 
   case 15: /* Value: _STRING_  */
-#line 179 "pseudoXMLgrammatica.y"
+#line 179 "Parser.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
 #line 1414 "Parser.c"
     break;
 
   case 16: /* Value: _DOLLAR T_Ident  */
-#line 180 "pseudoXMLgrammatica.y"
+#line 180 "Parser.y"
                     { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
 #line 1420 "Parser.c"
     break;
 
   case 17: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
-#line 181 "pseudoXMLgrammatica.y"
+#line 181 "Parser.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
 #line 1426 "Parser.c"
     break;
@@ -1624,7 +1624,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 184 "pseudoXMLgrammatica.y"
+#line 184 "Parser.y"
 
 
 /* Entrypoint: parse SourceFile from file. */

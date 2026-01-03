@@ -9,11 +9,11 @@ FLEX_OPTS = -Ppseudo_xm_lgrammatica_
 BISON = bison
 BISON_OPTS = -t -ppseudo_xm_lgrammatica_
 
-OBJS = Absyn.o Buffer.o Lexer.o Parser.o PseudoXMLParserSupport.o refSolver.o
+OBJS = Absyn.o Buffer.o Lexer.o Parser.o ParserSupport.o ReferenceSolver.o
 
 .PHONY : clean distclean
 
-all : TestpseudoXMLgrammatica
+all : TestProgram
 
 clean :
 	rm -f *.o TestpseudoXMLgrammatica pseudoXMLgrammatica.aux pseudoXMLgrammatica.log pseudoXMLgrammatica.pdf pseudoXMLgrammatica.dvi pseudoXMLgrammatica.ps pseudoXMLgrammatica
@@ -21,9 +21,9 @@ clean :
 distclean : clean
 	rm -f Absyn.h Absyn.c Bison.h Buffer.h Buffer.c pseudoXMLgrammatica.l Lexer.c pseudoXMLgrammatica.y Parser.h Parser.c Test.c Makefile pseudoXMLgrammatica.tex
 
-TestpseudoXMLgrammatica : ${OBJS} Test.o
-	@echo "Linking TestpseudoXMLgrammatica..."
-	${CC} ${OBJS} Test.o -o TestpseudoXMLgrammatica
+TestProgram : ${OBJS} TestProgram.o
+	@echo "Linking TestProgram..."
+	${CC} ${OBJS} TestProgram.o -o TestProgram
 
 Absyn.o : Absyn.c Absyn.h
 	${CC} ${CCFLAGS} -c Absyn.c
@@ -31,11 +31,11 @@ Absyn.o : Absyn.c Absyn.h
 Buffer.o : Buffer.c Buffer.h
 	${CC} ${CCFLAGS} -c Buffer.c
 
-Lexer.c : pseudoXMLgrammatica.l
-	${FLEX} ${FLEX_OPTS} -oLexer.c pseudoXMLgrammatica.l
+Lexer.c : Lexer.l
+	${FLEX} ${FLEX_OPTS} -oLexer.c Lexer.l
 
-Parser.c Bison.h : pseudoXMLgrammatica.y
-	${BISON} ${BISON_OPTS} pseudoXMLgrammatica.y -o Parser.c
+Parser.c Bison.h : Parser.y
+	${BISON} ${BISON_OPTS} Parser.y -o Parser.c
 
 Lexer.o : CCFLAGS+=-Wno-sign-conversion
 
@@ -45,11 +45,14 @@ Lexer.o : Lexer.c Bison.h
 Parser.o : Parser.c Absyn.h Bison.h
 	${CC} ${CCFLAGS} -c Parser.c
 
-refSolver.o : refSolver.c PseudoXMLParserSupport.h
-	${CC} ${CCFLAGS} -c refSolver.c
+ReferenceSolver.o : ReferenceSolver.c ParserSupport.h
+	${CC} ${CCFLAGS} -c ReferenceSolver.c
 
-PseudoXMLParserSupport.o : PseudoXMLParserSupport.c PseudoXMLParserSupport.h Absyn.h
-	${CC} ${CCFLAGS} -c PseudoXMLParserSupport.c
+ParserSupport.o : ParserSupport.c ParserSupport.h Absyn.h
+	${CC} ${CCFLAGS} -c ParserSupport.c
 
-Test.o : Test.c Parser.h Absyn.h
-	${CC} ${CCFLAGS} -c Test.c
+TestProgram.o : TestProgram.c Parser.h Absyn.h
+	${CC} ${CCFLAGS} -c TestProgram.c
+
+zip: Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c tests
+	zip ProgettoLC\ parte1\ Gruppo\ 25-3.zip Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c tests

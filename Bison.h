@@ -45,9 +45,9 @@
 extern int pseudo_xm_lgrammatica_debug;
 #endif
 /* "%code requires" blocks.  */
-#line 4 "pseudoXMLgrammatica.y"
+#line 4 "Parser.y"
 
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 
 #line 53 "Bison.h"
 
@@ -86,7 +86,7 @@ extern int pseudo_xm_lgrammatica_debug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 61 "pseudoXMLgrammatica.y"
+#line 61 "Parser.y"
 
   int    _int;
   char   _char;

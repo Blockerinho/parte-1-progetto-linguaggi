@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include "Absyn.h"
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 
 void pSourceFile(FILE *inp, section_entry** bindings);
 void psSourceFile(const char *str, section_entry** bindings);

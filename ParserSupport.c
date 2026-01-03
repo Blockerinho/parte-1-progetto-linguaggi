@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "Absyn.h"
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 
 section_entry* create_section_entry(char* name, section_entry* next) {
   section_entry* myself = (section_entry*) malloc(sizeof(*myself));

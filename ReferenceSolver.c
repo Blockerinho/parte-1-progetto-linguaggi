@@ -1,7 +1,8 @@
-#include "PseudoXMLParserSupport.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "ParserSupport.h"
 
 /* FUNZIONI PER RISOLUZIONE DEI VALORI */ 
 

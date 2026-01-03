@@ -2,7 +2,7 @@
 %defines "Bison.h"
 
 %code requires {
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 }
 
 /* Reentrant parser */
@@ -27,7 +27,7 @@
 #endif
 
 #include "Absyn.h"
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 #include "Parser.h"
 
 #define YYMAXDEPTH 10000000

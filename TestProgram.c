@@ -4,7 +4,7 @@
 
 #include "Parser.h"
 #include "Absyn.h"
-#include "PseudoXMLParserSupport.h"
+#include "ParserSupport.h"
 
 void usage(void) {
   printf("usage: Call with one of the following argument combinations:\n");
