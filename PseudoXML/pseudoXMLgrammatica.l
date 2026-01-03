@@ -24,6 +24,10 @@
 /* BEGIN extensible string buffer */
 
 #include "Buffer.h"
+#include <stdio.h>
+#include <string.h>
+#include "Parser.h"       
+#include "comment_tracker.h" 
 
 /* The initial size of the buffer to lex string literals. */
 #define LITERAL_BUFFER_INITIAL_SIZE 1024
@@ -48,23 +52,18 @@
 
 /* END extensible string buffer */
 
-static void update_loc(YYLTYPE* loc, char* text)
-{
-  loc->first_line = loc->last_line;
-  loc->first_column = loc->last_column;
-  int i = 0;
-  for (; text[i] != '\0'; ++i) {
-      if (text[i] == '\n') {
-          ++loc->last_line;
-          loc->last_column = 0;
-      } else {
-          ++loc->last_column;
-      }
-  }
-}
-#define YY_USER_ACTION update_loc(yylloc, yytext);
+int my_curr_col = 1;
+
+#define YY_USER_ACTION \
+    yylloc->first_line = yylloc->last_line = yylineno; \
+    yylloc->first_column = my_curr_col; \
+    yylloc->last_column = my_curr_col + yyleng; \
+    my_curr_col += yyleng;
 
 %}
+
+%option yylineno
+%option noyywrap
 
 LETTER [a-zA-Z]
 CAPITAL [A-Z]
@@ -74,6 +73,14 @@ IDENT [a-zA-Z0-9'_]
 %START CHAR CHARESC CHAREND STRING ESCAPED
 
 %%  /* Rules. */
+
+\n      { my_curr_col = 1; } /* Reset colonna a capo */
+[ \t\r] { /* Ignora spazi ma YY_USER_ACTION aggiorna le colonne automaticamente */ }
+
+#.* { 
+          /* Cattura commenti e salvali nel tracker */
+          store_comment(yylineno, yytext); 
+        }
 
 <INITIAL>"<"      	 return _LT;
 <INITIAL>">"      	 return _GT;
@@ -88,8 +95,6 @@ IDENT [a-zA-Z0-9'_]
 <INITIAL>"name"      	 return _KW_name;
 <INITIAL>"section"      	 return _KW_section;
 <INITIAL>"true"      	 return _KW_true;
-
-<INITIAL>"#"[^\n]* /* skip */; /* BNFC: comment "#" */
 
 <INITIAL>{LETTER}(\_|({DIGIT}|{LETTER}))*    	 yylval->_string = strdup(yytext); return T_Ident;
 <INITIAL>"\""        	 LITERAL_BUFFER_CREATE(); BEGIN STRING;
