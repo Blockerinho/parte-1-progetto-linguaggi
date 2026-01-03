@@ -153,7 +153,7 @@ SubLevelTag
             new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
             break;
           } else {
-            fprintf(stderr, "Warning: field %s has already been defined in section %s, skipping it.\n", $5, new_section->name);
+            fprintf(stderr, "Warning: section %s: field %s has already been defined, skipping it.\n", new_section->name, $5);
             break;
           }
         }

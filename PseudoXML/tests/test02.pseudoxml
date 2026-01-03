@@ -1,0 +1,8 @@
+# file corretto, no conflitti, con import
+
+<import>"tests/test02_imported1.pseudoxml"</import>
+
+<section name=sez2>
+	<inherit>sez1</inherit>
+	<field name=f12>true</field> # campo sovrascritto
+</section>

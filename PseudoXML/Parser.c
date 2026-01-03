@@ -1364,7 +1364,7 @@ yyreduce:
             new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
             break;
           } else {
-            fprintf(stderr, "Warning: field %s has already been defined in section %s, skipping it.\n", (yyvsp[-6]._string), new_section->name);
+            fprintf(stderr, "Warning: section %s: field %s has already been defined, skipping it.\n", new_section->name, (yyvsp[-6]._string));
             break;
           }
         }

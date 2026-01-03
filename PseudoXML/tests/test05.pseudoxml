@@ -1,0 +1,5 @@
+# riferimento a sezione che non esiste
+
+<section name=sez1>
+	<field name=f11>$sez2.f12</field>
+</section>
