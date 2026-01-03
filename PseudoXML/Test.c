@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Parser.h"
 #include "Absyn.h"
 #include "PseudoXMLParserSupport.h"
 #include "Printer.h"
 #include "comment_tracker.h"
+
+/* Forward declarations from parser */
+extern void pSourceFile(FILE *inp, section_entry** bindings);
+extern void pnSourceFile(const char *str, section_entry** bindings);
 
 void usage(void) {
   printf("usage: Call with one of the following argument combinations:\n");
@@ -18,7 +21,7 @@ void usage(void) {
 
 int main(int argc, char ** argv)
 {
-  FILE *input;
+  FILE *input = NULL;
   int quiet = 0;
   char *filename = NULL;
 
@@ -34,29 +37,25 @@ int main(int argc, char ** argv)
       filename = argv[1];
     }
   }
-  SourceFile parse_tree = NULL; 
+  
   section_entry* bindings = NULL;
+  
   if (filename) {
-    parse_tree = pnSourceFile(filename, &bindings);
-    if (!input) {
-      usage();
-      exit(1);
-    }
-  }
-  else {
-    parse_tree = pSourceFile(stdin, &bindings);
+    pnSourceFile(filename, &bindings);
+  } else {
+    pSourceFile(stdin, &bindings);
   }
   
-  if(parse_tree){
-    char *output = printSourceFile(parse_tree); //pretty-printing
-    printf("%s\n", output); 
-
-    if (bindings) {
-      print_bindings(bindings);
-    }
+  if (bindings) {
+    char *output = printFromBindings(bindings);
+    printf("%s\n", output);
+  
+    print_bindings(bindings);
+    
+    free_comments();
     return 0;
-  }else{
-    fprintf(stderr, "Parsing failed: no AST generated\n"); 
+  } else {
+    fprintf(stderr, "Parsing failed: no bindings created\n"); 
     return 1; 
   }
 }
