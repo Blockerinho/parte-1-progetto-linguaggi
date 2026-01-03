@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Printer.h"
+#include "comment_tracker.h"
+#include "PseudoXMLParserSupport.h"
 
 #define INDENT_WIDTH 2
 
@@ -16,53 +18,33 @@ char *buf_;
 size_t cur_;
 size_t buf_size;
 
-/* You may wish to change the renderC functions */
+/* --- FUNZIONI DI SUPPORTO PER STRINGHE --- */
+
+void indent(void)
+{
+  int n = _n_;
+  while (--n >= 0)
+    bufAppendC(' ');
+}
+
+void removeTrailingSpaces()
+{
+  while (cur_ && buf_[cur_ - 1] == ' ') --cur_;
+  buf_[cur_] = 0;
+}
+
+void onEmptyLine()
+{
+  removeTrailingSpaces();
+  if (cur_ && buf_[cur_ - 1 ] != '\n') bufAppendC('\n');
+  indent();
+}
+
 void renderC(Char c)
 {
-  if (c == '{')
-  {
-     onEmptyLine();
-     bufAppendC(c);
-     _n_ = _n_ + INDENT_WIDTH;
-     bufAppendC('\n');
-     indent();
-  }
-  else if (c == '(' || c == '[')
-     bufAppendC(c);
-  else if (c == ')' || c == ']')
-  {
-     removeTrailingWhitespace();
-     bufAppendC(c);
-     bufAppendC(' ');
-  }
-  else if (c == '}')
-  {
-     _n_ = _n_ - INDENT_WIDTH;
-     onEmptyLine();
-     bufAppendC(c);
-     bufAppendC('\n');
-     indent();
-  }
-  else if (c == ',')
-  {
-     removeTrailingWhitespace();
-     bufAppendC(c);
-     bufAppendC(' ');
-  }
-  else if (c == ';')
-  {
-     removeTrailingWhitespace();
-     bufAppendC(c);
-     bufAppendC('\n');
-     indent();
-  }
-  else if (c == ' ') bufAppendC(c);
-  else if (c == 0) return;
-  else
-  {
-     bufAppendC(c);
-     bufAppendC(' ');
-  }
+  /* Per XML usiamo una logica diversa gestita manualmente in printFromBindings */
+  bufAppendC(c);
+  bufAppendC(' '); 
 }
 
 int allIsSpace(String s)
@@ -75,23 +57,11 @@ int allIsSpace(String s)
 
 void renderS(String s)
 {
-  if (*s) /* s[0] != '\0', string s not empty */
+  if (*s) 
   {
-    if (allIsSpace(s)) {
-      backup();
-      bufAppendS(s);
-    } else {
-      bufAppendS(s);
-      bufAppendC(' ');
-    }
-  }
-}
-
-void indent(void)
-{
-  int n = _n_;
-  while (--n >= 0)
+    bufAppendS(s);
     bufAppendC(' ');
+  }
 }
 
 void backup(void)
@@ -100,274 +70,241 @@ void backup(void)
     buf_[--cur_] = 0;
 }
 
-void removeTrailingSpaces()
-{
-  while (cur_ && buf_[cur_ - 1] == ' ') --cur_;
-  buf_[cur_] = 0;
+/* --- FUNZIONI PER I COMMENTI --- */
+
+void flush_comments_up_to(int line_limit){
+  comment_entry *curr = glob_commentListHead; 
+  while(curr){
+    /* Se troviamo un commento che viene prima della linea corrente */
+    if(curr->line_number < line_limit && !curr->already_printed){
+      //onEmptyLine(); // Vai a capo prima di stampare il commento
+      bufAppendS(curr->text); 
+      onEmptyLine(); // Vai a capo dopo il commento
+      curr->already_printed = 1; 
+    }
+    curr = curr->next; 
+  }
 }
 
-void removeTrailingWhitespace()
-{
-  while (cur_ && (buf_[cur_ - 1] == ' ' || buf_[cur_ - 1] == '\n')) --cur_;
-  buf_[cur_] = 0;
+void print_inline_comments(int current_line){
+  comment_entry *curr = glob_commentListHead; 
+  while(curr){ 
+    if(curr->line_number == current_line && !curr->already_printed){
+      bufAppendC(' '); // Spazio prima del commento inline
+      bufAppendS(curr->text); 
+      curr->already_printed = 1; 
+    }
+    curr = curr->next; 
+  }
 }
 
-void onEmptyLine()
-{
-  removeTrailingSpaces();
-  if (cur_ && buf_[cur_ - 1 ] != '\n') bufAppendC('\n');
-  indent();
+void flush_remaining_comments(){
+  comment_entry *curr = glob_commentListHead;
+  int printed_something = 0;
+  while(curr){
+      if(!curr->already_printed){
+        if (!printed_something) onEmptyLine();
+        bufAppendS(curr->text);
+        bufAppendC('\n');
+        curr->already_printed = 1;
+        printed_something = 1;
+      }
+      curr = curr->next;
+  }
 }
-char *printSourceFile(SourceFile p)
+
+/* Funzioni per invertire le liste */
+
+/* Inverte la lista delle sezioni per processarle in ordine di apparizione */
+section_entry* reverse_sections(section_entry* head) {
+    section_entry* prev = NULL;
+    section_entry* current = head;
+    section_entry* next = NULL;
+    while (current != NULL) {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+    return prev;
+}
+
+field_entry* reverse_fields(field_entry* head) {
+    field_entry* prev = NULL;
+    field_entry* current = head;
+    field_entry* next = NULL;
+    while (current != NULL) {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+    return prev;
+}
+
+void ppInteger(Integer n, int i);
+void ppBoolean(int boolean_val, int _i_);
+void ppString(String s, int i);
+void ppIdent(String s, int i);
+
+/* STAMPA LA SYMBOL TABLE COME CODICE SORGENTE */
+char *printFromBindings(section_entry* bindings)
 {
   _n_ = 0;
   bufReset();
-  ppSourceFile(p, 0);
+  
+  /* INVERSIONE TEMPORANEA (Cruciale per l'ordine di stampa) */
+  /* Invertiamo la lista sezioni per stamparle nell'ordine originale
+     il parser costruisce la lista concatenata in memoria (LIFO) rispetto a come deve essere stampata (FIFO). 
+     Durante il parsing, ogni volta che viene trovata una nuova sezione o un nuovo campo, questo viene inserito in testa alla lista esistente */
+
+  section_entry* reversed_bindings = reverse_sections(bindings);
+  
+  /* Invertiamo i campi dentro ogni sezione */
+  section_entry* s = reversed_bindings;
+  while(s) {
+      s->fields = reverse_fields(s->fields);
+      s = s->next;
+  }
+
+  if(reversed_bindings){
+    flush_comments_up_to(reversed_bindings->line); 
+  }
+  
+  section_entry* current_section = reversed_bindings; 
+  
+  while (current_section) {
+
+    flush_comments_up_to(current_section->line);
+    onEmptyLine();
+    
+    bufAppendC('<');
+    bufAppendS("section");
+    bufAppendC(' ');
+    bufAppendS("name");
+    bufAppendC('=');
+    ppIdent(current_section->name, 0);
+    print_inline_comments(current_section->line);
+    bufAppendC('>');
+    
+    print_inline_comments(current_section->line);
+    
+    _n_ += INDENT_WIDTH;
+    
+    field_entry* current_field = current_section->fields;
+    while (current_field) {
+        
+        flush_comments_up_to(current_field->line);
+        onEmptyLine();
+
+        if (current_field->kind == is_Inherited) {
+             bufAppendC('<');
+             bufAppendS("inherit");
+             bufAppendC('>');
+             if (current_field->references && current_field->references->section)
+                 ppIdent(current_field->references->section->name, 0);
+             bufAppendC('<');
+             bufAppendC('/');
+             bufAppendS("inherit");
+             bufAppendC('>');
+
+        } else {
+             bufAppendC('<');
+             bufAppendS("field");
+             bufAppendC(' ');
+             bufAppendS("name");
+             bufAppendC('=');
+             ppIdent(current_field->name, 0);
+             print_inline_comments(current_field->line);
+             bufAppendC('>');
+             switch (current_field->kind) {
+                case is_Integer: ppInteger(current_field->value_Integer, 0); break;
+                case is_Boolean: ppBoolean(current_field->value_Boolean, 0); break;
+                case is_String:  ppString(current_field->value_String, 0);
+                  break;
+                case is_Local:   
+                    bufAppendC('$'); 
+                    if(current_field->references) ppIdent(current_field->references->name, 0); 
+                    break;
+                case is_NonLocal: 
+                    bufAppendC('$');
+                    if(current_field->references && current_field->references->section) {
+                        ppIdent(current_field->references->section->name, 0);
+                        bufAppendC('.');
+                        ppIdent(current_field->references->name, 0);
+                    }
+                    break;
+                default: break;
+            }
+            bufAppendC('<');
+            bufAppendC('/');
+            bufAppendS("field");
+            bufAppendC('>');
+        }
+        print_inline_comments(current_field->line);
+
+        current_field = current_field->next;
+    }
+
+    _n_ -= INDENT_WIDTH;
+    onEmptyLine();
+    bufAppendC('<');
+    bufAppendC('/');
+    bufAppendS("section");
+    bufAppendC('>');
+    
+    current_section = current_section->next;
+  }
+  
+  flush_remaining_comments();
+
+  /* 3. RIPRISTINO STATO (Restore original list order) */
+  /* Re-invertiamo i campi */
+  s = reversed_bindings;
+  while(s) {
+      s->fields = reverse_fields(s->fields);
+      s = s->next;
+  }
+  /* Re-invertiamo le sezioni per tornare allo stato originale */
+  reverse_sections(reversed_bindings);
+
   return buf_;
 }
-char *showSourceFile(SourceFile p)
-{
-  _n_ = 0;
-  bufReset();
-  shSourceFile(p);
-  return buf_;
-}
-void ppSourceFile(SourceFile p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_MainFile:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppListTopLevelTag(p->u.mainFile_.listtopleveltag_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
 
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SourceFile!\n");
-    exit(1);
-  }
+void ppBoolean(int boolean_val, int _i_) {
+  if (boolean_val) renderS("true");
+  else renderS("false");
 }
 
-void ppListTopLevelTag(ListTopLevelTag listtopleveltag, int i)
-{
-  if (listtopleveltag == 0)
-  { /* nil */
-  }
-  else
-  { /* cons */
-    ppTopLevelTag(listtopleveltag->topleveltag_, 0);
-    ppListTopLevelTag(listtopleveltag->listtopleveltag_, 0);
-  }
-}
-
-void ppTopLevelTag(TopLevelTag p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_FileImportTag:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-    renderS("import");
-    renderC('>');
-    ppString(p->u.fileImportTag_.string_, 0);
-    renderC('<');
-    renderC('/');
-    renderS("import");
-    renderC('>');
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_SectionTag:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-    renderS("section");
-    renderS("name");
-    renderC('=');
-    ppIdent(p->u.sectionTag_.ident_, 0);
-    renderC('>');
-    ppListSubLevelTag(p->u.sectionTag_.listsubleveltag_, 0);
-    renderC('<');
-    renderC('/');
-    renderS("section");
-    renderC('>');
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing TopLevelTag!\n");
-    exit(1);
-  }
-}
-
-void ppListSubLevelTag(ListSubLevelTag listsubleveltag, int i)
-{
-  if (listsubleveltag == 0)
-  { /* nil */
-  }
-  else
-  { /* cons */
-    ppSubLevelTag(listsubleveltag->subleveltag_, 0);
-    ppListSubLevelTag(listsubleveltag->listsubleveltag_, 0);
-  }
-}
-
-void ppSubLevelTag(SubLevelTag p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_FieldTag:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-    renderS("field");
-    renderS("name");
-    renderC('=');
-    ppIdent(p->u.fieldTag_.ident_, 0);
-    renderC('>');
-    ppValue(p->u.fieldTag_.value_, 0);
-    renderC('<');
-    renderC('/');
-    renderS("field");
-    renderC('>');
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_InheritTag:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('<');
-    renderS("inherit");
-    renderC('>');
-    ppIdent(p->u.inheritTag_.ident_, 0);
-    renderC('<');
-    renderC('/');
-    renderS("inherit");
-    renderC('>');
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing SubLevelTag!\n");
-    exit(1);
-  }
-}
-
-void ppValue(Value p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_ValueInt:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppInteger(p->u.valueInt_.integer_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ValueBool:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppBoolean(p->u.valueBool_.boolean_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ValueString:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppString(p->u.valueString_.string_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ValueNonLoc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppNonLocVar(p->u.valueNonLoc_.nonlocvar_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing Value!\n");
-    exit(1);
-  }
-}
-
-void ppBoolean(Boolean p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_Boolean_true:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("true");
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_Boolean_false:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("false");
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing Boolean!\n");
-    exit(1);
-  }
-}
-
-void ppNonLocVar(NonLocVar p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_SimpleNonLoc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('$');
-    ppIdent(p->u.simpleNonLoc_.ident_, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_NonLoc:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderC('$');
-    ppIdent(p->u.nonLoc_.ident_1, 0);
-    renderC('.');
-    ppIdent(p->u.nonLoc_.ident_2, 0);
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing NonLocVar!\n");
-    exit(1);
-  }
-}
-
-void ppInteger(Integer n, int i)
-{
+void ppInteger(Integer n, int i) {
   char tmp[20];
   sprintf(tmp, "%d", n);
   renderS(tmp);
 }
-void ppDouble(Double d, int i)
-{
+
+void ppDouble(Double d, int i) {
   char tmp[24];
   sprintf(tmp, "%.15g", d);
   renderS(tmp);
 }
-void ppChar(Char c, int i)
-{
-  bufAppendC('\'');
-  bufEscapeC(c);
-  bufAppendC('\'');
-  bufAppendC(' ');
-}
-void ppString(String s, int i)
-{
+
+void ppString(String s, int i) {
   bufAppendC('\"');
-  bufEscapeS(s);
+  bufAppendS(s); 
   bufAppendC('\"');
   bufAppendC(' ');
 }
-void ppIdent(String s, int i)
-{
-  renderS(s);
+
+void ppIdent(String s, int i) {
+  if(s[0] == '\"') { // Se è già una stringa
+      renderS(s);
+  } else {
+      //bufAppendC('\"'); // Aggiungo virgolette per name="X"
+      bufAppendS(s);
+      //bufAppendC('\"');
+      bufAppendC(' ');
+  }
 }
-
-/* void ppIdent(String s, int i)
-{
-  renderS(s);
-} */
-
 
 void shSourceFile(SourceFile p)
 {
@@ -375,15 +312,10 @@ void shSourceFile(SourceFile p)
   {
   case is_MainFile:
     bufAppendC('(');
-
     bufAppendS("MainFile");
-
     bufAppendC(' ');
-
     shListTopLevelTag(p->u.mainFile_.listtopleveltag_);
-
     bufAppendC(')');
-
     break;
 
   default:
@@ -418,29 +350,20 @@ void shTopLevelTag(TopLevelTag p)
   {
   case is_FileImportTag:
     bufAppendC('(');
-
     bufAppendS("FileImportTag");
-
     bufAppendC(' ');
-
     shString(p->u.fileImportTag_.string_);
-
     bufAppendC(')');
-
     break;
+
   case is_SectionTag:
     bufAppendC('(');
-
     bufAppendS("SectionTag");
-
     bufAppendC(' ');
-
     shIdent(p->u.sectionTag_.ident_);
-  bufAppendC(' ');
+    bufAppendC(' ');
     shListSubLevelTag(p->u.sectionTag_.listsubleveltag_);
-
     bufAppendC(')');
-
     break;
 
   default:
@@ -475,29 +398,20 @@ void shSubLevelTag(SubLevelTag p)
   {
   case is_FieldTag:
     bufAppendC('(');
-
     bufAppendS("FieldTag");
-
     bufAppendC(' ');
-
     shIdent(p->u.fieldTag_.ident_);
-  bufAppendC(' ');
+    bufAppendC(' ');
     shValue(p->u.fieldTag_.value_);
-
     bufAppendC(')');
-
     break;
+
   case is_InheritTag:
     bufAppendC('(');
-
     bufAppendS("InheritTag");
-
     bufAppendC(' ');
-
     shIdent(p->u.inheritTag_.ident_);
-
     bufAppendC(')');
-
     break;
 
   default:
@@ -512,51 +426,44 @@ void shValue(Value p)
   {
   case is_ValueInt:
     bufAppendC('(');
-
     bufAppendS("ValueInt");
-
     bufAppendC(' ');
-
-    shInteger(p->u.valueInt_.integer_);
-
+    shInteger(p->value_int);
     bufAppendC(')');
-
     break;
+
   case is_ValueBool:
     bufAppendC('(');
-
     bufAppendS("ValueBool");
-
     bufAppendC(' ');
-
-    shBoolean(p->u.valueBool_.boolean_);
-
+    shBoolean(p->value_bool);
     bufAppendC(')');
-
     break;
+
   case is_ValueString:
     bufAppendC('(');
-
     bufAppendS("ValueString");
-
     bufAppendC(' ');
-
-    shString(p->u.valueString_.string_);
-
+    shString(p->value_string);
     bufAppendC(')');
-
     break;
-  case is_ValueNonLoc:
+
+  case is_ValueLocal:
     bufAppendC('(');
-
-    bufAppendS("ValueNonLoc");
-
+    bufAppendS("ValueLocal");
     bufAppendC(' ');
-
-    shNonLocVar(p->u.valueNonLoc_.nonlocvar_);
-
+    shString(p->value_local);
     bufAppendC(')');
+    break;
 
+  case is_ValueNonLocal:
+    bufAppendC('(');
+    bufAppendS("ValueNonLocal");
+    bufAppendC(' ');
+    shString(p->value_nonlocal.section_name);
+    bufAppendC(' ');
+    shString(p->value_nonlocal.field_name);
+    bufAppendC(')');
     break;
 
   default:
@@ -565,30 +472,12 @@ void shValue(Value p)
   }
 }
 
-void shBoolean(Boolean p)
+void shBoolean(int boolean_val)
 {
-  switch(p->kind)
-  {
-  case is_Boolean_true:
-
+  if (boolean_val) {
     bufAppendS("Boolean_true");
-
-
-
-
-    break;
-  case is_Boolean_false:
-
+  } else {
     bufAppendS("Boolean_false");
-
-
-
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing Boolean!\n");
-    exit(1);
   }
 }
 
@@ -598,29 +487,20 @@ void shNonLocVar(NonLocVar p)
   {
   case is_SimpleNonLoc:
     bufAppendC('(');
-
     bufAppendS("SimpleNonLoc");
-
     bufAppendC(' ');
-
     shIdent(p->u.simpleNonLoc_.ident_);
-
     bufAppendC(')');
-
     break;
+
   case is_NonLoc:
     bufAppendC('(');
-
     bufAppendS("NonLoc");
-
     bufAppendC(' ');
-
     shIdent(p->u.nonLoc_.ident_1);
-  bufAppendC(' ');
+    bufAppendC(' ');
     shIdent(p->u.nonLoc_.ident_2);
-
     bufAppendC(')');
-
     break;
 
   default:
@@ -635,24 +515,28 @@ void shInteger(Integer i)
   sprintf(tmp, "%d", i);
   bufAppendS(tmp);
 }
+
 void shDouble(Double d)
 {
   char tmp[24];
   sprintf(tmp, "%.15g", d);
   bufAppendS(tmp);
 }
+
 void shChar(Char c)
 {
   bufAppendC('\'');
   bufEscapeC(c);
   bufAppendC('\'');
 }
+
 void shString(String s)
 {
   bufAppendC('\"');
   bufEscapeS(s);
   bufAppendC('\"');
 }
+
 void shIdent(String s)
 {
   bufAppendC('\"');
@@ -660,18 +544,11 @@ void shIdent(String s)
   bufAppendC('\"');
 }
 
-/* void shIdent(String s)
-{
-  bufAppendC('\"');
-  bufEscapeS(s);
-  bufAppendC('\"');
-} */
-
-
 void bufEscapeS(const char *s)
 {
   if (s) while (*s) bufEscapeC(*s++);
 }
+
 void bufEscapeC(const char c)
 {
   switch(c)
@@ -694,7 +571,7 @@ void bufAppendS(const char *s)
   size_t n;
   while (cur_ + len >= buf_size)
   {
-    buf_size *= 2; /* Double the buffer size */
+    buf_size *= 2;
     resizeBuffer();
   }
   for(n = 0; n < len; n++)
@@ -704,17 +581,19 @@ void bufAppendS(const char *s)
   cur_ += len;
   buf_[cur_] = 0;
 }
+
 void bufAppendC(const char c)
 {
   if (cur_ + 1 >= buf_size)
   {
-    buf_size *= 2; /* Double the buffer size */
+    buf_size *= 2;
     resizeBuffer();
   }
   buf_[cur_] = c;
   cur_++;
   buf_[cur_] = 0;
 }
+
 void bufReset(void)
 {
   cur_ = 0;
@@ -722,6 +601,7 @@ void bufReset(void)
   resizeBuffer();
   memset(buf_, 0, buf_size);
 }
+
 void resizeBuffer(void)
 {
   char *temp = (char *) malloc(buf_size);
@@ -732,11 +612,8 @@ void resizeBuffer(void)
   }
   if (buf_)
   {
-    strncpy(temp, buf_, buf_size); /* peteg: strlcpy is safer, but not POSIX/ISO C. */
+    strncpy(temp, buf_, buf_size);
     free(buf_);
   }
   buf_ = temp;
 }
-char *buf_;
-size_t cur_, buf_size;
-
