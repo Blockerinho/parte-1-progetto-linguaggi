@@ -14,7 +14,8 @@
 %locations
 
 /* Argument to the parser to be filled with the parsed tree. */
-%parse-param { section_entry** bindings } { int* reached_section}
+%parse-param { section_entry** bindings }
+%parse-param { int* reached_section}
 
 %{
 /* Begin C preamble code */
@@ -115,12 +116,15 @@ ListTopLevelTag
 TopLevelTag
   : _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT {
       if (*reached_section) {
-        fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+        fprintf(stderr, "Error: imports must come before sections.\n");
         exit(1);
       }
       pnSourceFile($4, bindings);
      }
-  | _LT _KW_section _KW_name  _EQ T_Ident { new_section = create_section_entry($5, *bindings); } _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
+  | _LT _KW_section _KW_name  _EQ T_Ident {
+      /* Passing line number @5.first_line */
+      new_section = create_section_entry($5, *bindings, @5.first_line); 
+  } _GT ListSubLevelTag _LT _SLASH _KW_section _GT {
       section_entry* current_section = *bindings;
       while (current_section) {
         if (!strcmp(current_section->name, $5)) {
@@ -150,7 +154,7 @@ SubLevelTag
           if (current_field->kind == is_Inherited) {
             fprintf(stderr, "Info: overwriting field %s in section %s that was inherited from section %s.\n", $5, new_section->name, current_field->references->section->name);
             delete_field_entry(current_field);
-            new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
+            new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings, @5.first_line);
             break;
           } else {
             fprintf(stderr, "Warning: section %s: field %s has already been defined, skipping it.\n", new_section->name, $5);
@@ -160,12 +164,12 @@ SubLevelTag
         current_field = current_field->next;
       }
       if (!current_field) {
-        new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings);
+        new_section->fields = create_field_entry($5, $7, new_section, new_section->fields, *bindings, @5.first_line);
       }
     }
   | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT {
       if (reached_field) {
-        fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+        fprintf(stderr, "Error: inherited fields must come before normal fields.\n");
         exit(1);
       }
       new_section->fields = inherit_fields($4, new_section, *bindings);

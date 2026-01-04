@@ -2,13 +2,18 @@
 
 <section name=sez1>
 	<field name=f11>1</field>
-	<field name=f12>true</field>
-</section>
-
+	<field name=f12>true</field> # com 1
+</section> # com 2
+#com 3
 <section name=sez2>
 	<field name=f21>false</field>
 	<field name=f22>"non dire cane"</field>
 </section>
+
+
+
+
+# com 4
 
 <section name=sez3>
 	<field name=f31>$sez2.f22</field>

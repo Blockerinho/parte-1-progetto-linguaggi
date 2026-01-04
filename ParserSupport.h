@@ -108,9 +108,6 @@ void delete_field_by_name(char* field_name, char* section_name, section_entry* b
 /* Cancella un backlink */
 void delete_backlink(backlink* backlink, field_entry* field);
 
-void free_all_sections(section_entry* sections);
-
-
 /* Printing dei bindings per debugging.
    La notazione -> significa che il campo si riferisce a un altro campo locale
    o non locale.

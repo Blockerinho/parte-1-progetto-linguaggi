@@ -72,7 +72,7 @@
 #define yynerrs         pseudo_xm_lgrammatica_nerrs
 
 /* First part of user prologue.  */
-#line 19 "Parser.y"
+#line 20 "Parser.y"
 
 /* Begin C preamble code */
 
@@ -175,7 +175,7 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Second part of user prologue.  */
-#line 69 "Parser.y"
+#line 70 "Parser.y"
 
 void yyerror(YYLTYPE *loc, yyscan_t scanner, section_entry** bindings, int* reached_section, const char *msg)
 {
@@ -574,8 +574,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   107,   107,   111,   112,   116,   123,   123,   139,   140,
-     144,   166,   176,   177,   178,   179,   180,   181
+       0,   108,   108,   112,   113,   117,   124,   124,   143,   144,
+     148,   170,   180,   181,   182,   183,   184,   185
 };
 #endif
 
@@ -1285,28 +1285,28 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* SourceFile: ListTopLevelTag  */
-#line 107 "Parser.y"
+#line 108 "Parser.y"
                     {}
 #line 1291 "Parser.c"
     break;
 
   case 3: /* ListTopLevelTag: %empty  */
-#line 111 "Parser.y"
+#line 112 "Parser.y"
                 {}
 #line 1297 "Parser.c"
     break;
 
   case 4: /* ListTopLevelTag: ListTopLevelTag TopLevelTag  */
-#line 112 "Parser.y"
+#line 113 "Parser.y"
                                 {}
 #line 1303 "Parser.c"
     break;
 
   case 5: /* TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT  */
-#line 116 "Parser.y"
+#line 117 "Parser.y"
                                                           {
       if (*reached_section) {
-        fprintf(stderr, "Errore: gli import devono venire prima delle sezioni.\n");
+        fprintf(stderr, "Error: imports must come before sections.\n");
         exit(1);
       }
       pnSourceFile((yyvsp[-4]._string), bindings);
@@ -1315,14 +1315,17 @@ yyreduce:
     break;
 
   case 6: /* $@1: %empty  */
-#line 123 "Parser.y"
-                                          { new_section = create_section_entry((yyvsp[0]._string), *bindings); }
-#line 1321 "Parser.c"
+#line 124 "Parser.y"
+                                          {
+      /* Passing line number @5.first_line */
+      new_section = create_section_entry((yyvsp[0]._string), *bindings, (yylsp[0]).first_line); 
+  }
+#line 1324 "Parser.c"
     break;
 
   case 7: /* TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident $@1 _GT ListSubLevelTag _LT _SLASH _KW_section _GT  */
-#line 123 "Parser.y"
-                                                                                                                                                {
+#line 127 "Parser.y"
+                                                   {
       section_entry* current_section = *bindings;
       while (current_section) {
         if (!strcmp(current_section->name, (yyvsp[-7]._string))) {
@@ -1335,23 +1338,23 @@ yyreduce:
       reached_field = 0;
       *bindings = new_section;
     }
-#line 1339 "Parser.c"
+#line 1342 "Parser.c"
     break;
 
   case 8: /* ListSubLevelTag: %empty  */
-#line 139 "Parser.y"
+#line 143 "Parser.y"
                 {}
-#line 1345 "Parser.c"
+#line 1348 "Parser.c"
     break;
 
   case 9: /* ListSubLevelTag: ListSubLevelTag SubLevelTag  */
-#line 140 "Parser.y"
+#line 144 "Parser.y"
                                 {}
-#line 1351 "Parser.c"
+#line 1354 "Parser.c"
     break;
 
   case 10: /* SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT  */
-#line 144 "Parser.y"
+#line 148 "Parser.y"
                                                                           {
       reached_field = 1;
 
@@ -1361,7 +1364,7 @@ yyreduce:
           if (current_field->kind == is_Inherited) {
             fprintf(stderr, "Info: overwriting field %s in section %s that was inherited from section %s.\n", (yyvsp[-6]._string), new_section->name, current_field->references->section->name);
             delete_field_entry(current_field);
-            new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
+            new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings, (yylsp[-6]).first_line);
             break;
           } else {
             fprintf(stderr, "Warning: section %s: field %s has already been defined, skipping it.\n", new_section->name, (yyvsp[-6]._string));
@@ -1371,62 +1374,62 @@ yyreduce:
         current_field = current_field->next;
       }
       if (!current_field) {
-        new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings);
+        new_section->fields = create_field_entry((yyvsp[-6]._string), (yyvsp[-4].value_), new_section, new_section->fields, *bindings, (yylsp[-6]).first_line);
       }
     }
-#line 1378 "Parser.c"
+#line 1381 "Parser.c"
     break;
 
   case 11: /* SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT  */
-#line 166 "Parser.y"
+#line 170 "Parser.y"
                                                            {
       if (reached_field) {
-        fprintf(stderr, "Errore: i campi ereditati devono venire prima dei campi normali.\n");
+        fprintf(stderr, "Error: inherited fields must come before normal fields.\n");
         exit(1);
       }
       new_section->fields = inherit_fields((yyvsp[-4]._string), new_section, *bindings);
     }
-#line 1390 "Parser.c"
+#line 1393 "Parser.c"
     break;
 
   case 12: /* Value: _INTEGER_  */
-#line 176 "Parser.y"
+#line 180 "Parser.y"
               { (yyval.value_) = make_ValueInt((yyvsp[0]._int)); }
-#line 1396 "Parser.c"
+#line 1399 "Parser.c"
     break;
 
   case 13: /* Value: _KW_true  */
-#line 177 "Parser.y"
+#line 181 "Parser.y"
              { (yyval.value_) = make_ValueBool(1); }
-#line 1402 "Parser.c"
+#line 1405 "Parser.c"
     break;
 
   case 14: /* Value: _KW_false  */
-#line 178 "Parser.y"
+#line 182 "Parser.y"
               { (yyval.value_) = make_ValueBool(0); }
-#line 1408 "Parser.c"
+#line 1411 "Parser.c"
     break;
 
   case 15: /* Value: _STRING_  */
-#line 179 "Parser.y"
+#line 183 "Parser.y"
              { (yyval.value_) = make_ValueString((yyvsp[0]._string)); }
-#line 1414 "Parser.c"
+#line 1417 "Parser.c"
     break;
 
   case 16: /* Value: _DOLLAR T_Ident  */
-#line 180 "Parser.y"
+#line 184 "Parser.y"
                     { (yyval.value_) = make_ValueLocal((yyvsp[0]._string)); }
-#line 1420 "Parser.c"
+#line 1423 "Parser.c"
     break;
 
   case 17: /* Value: _DOLLAR T_Ident _DOT T_Ident  */
-#line 181 "Parser.y"
+#line 185 "Parser.y"
                                  { (yyval.value_) = make_ValueNonLocal((yyvsp[-2]._string), (yyvsp[0]._string)); }
-#line 1426 "Parser.c"
+#line 1429 "Parser.c"
     break;
 
 
-#line 1430 "Parser.c"
+#line 1433 "Parser.c"
 
       default: break;
     }
@@ -1624,7 +1627,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 184 "Parser.y"
+#line 188 "Parser.y"
 
 
 /* Entrypoint: parse SourceFile from file. */

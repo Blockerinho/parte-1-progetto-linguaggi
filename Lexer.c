@@ -725,6 +725,7 @@ static const flex_int16_t yy_chk[171] =
 #line 19 "Lexer.l"
 #include "Absyn.h"
 #include "Bison.h"
+#include "CommentTracker.h"
 
 #define initialize_lexer pseudo_xm_lgrammatica__initialize_lexer
 
@@ -771,9 +772,9 @@ static void update_loc(YYLTYPE* loc, char* text)
 }
 #define YY_USER_ACTION update_loc(yylloc, yytext);
 
-#line 774 "Lexer.c"
+#line 775 "Lexer.c"
 
-#line 776 "Lexer.c"
+#line 777 "Lexer.c"
 
 #define INITIAL 0
 #define CHAR 1
@@ -1058,10 +1059,10 @@ YY_DECL
 		}
 
 	{
-#line 76 "Lexer.l"
+#line 77 "Lexer.l"
 
 
-#line 1064 "Lexer.c"
+#line 1065 "Lexer.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1120,166 +1121,166 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 78 "Lexer.l"
+#line 79 "Lexer.l"
 return _LT;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 79 "Lexer.l"
+#line 80 "Lexer.l"
 return _GT;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 80 "Lexer.l"
+#line 81 "Lexer.l"
 return _SLASH;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 81 "Lexer.l"
+#line 82 "Lexer.l"
 return _EQ;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 82 "Lexer.l"
+#line 83 "Lexer.l"
 return _DOLLAR;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 83 "Lexer.l"
+#line 84 "Lexer.l"
 return _DOT;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 84 "Lexer.l"
+#line 85 "Lexer.l"
 return _KW_false;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 85 "Lexer.l"
+#line 86 "Lexer.l"
 return _KW_field;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 86 "Lexer.l"
+#line 87 "Lexer.l"
 return _KW_import;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 87 "Lexer.l"
+#line 88 "Lexer.l"
 return _KW_inherit;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 88 "Lexer.l"
+#line 89 "Lexer.l"
 return _KW_name;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 89 "Lexer.l"
+#line 90 "Lexer.l"
 return _KW_section;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 90 "Lexer.l"
+#line 91 "Lexer.l"
 return _KW_true;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 92 "Lexer.l"
-/* skip */; /* BNFC: comment "#" */
+#line 93 "Lexer.l"
+{ store_comment(yylloc->first_line, yytext); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 94 "Lexer.l"
+#line 95 "Lexer.l"
 yylval->_string = strdup(yytext); return T_Ident;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 95 "Lexer.l"
+#line 96 "Lexer.l"
 LITERAL_BUFFER_CREATE(); BEGIN STRING;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 96 "Lexer.l"
+#line 97 "Lexer.l"
 BEGIN ESCAPED;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 97 "Lexer.l"
+#line 98 "Lexer.l"
 yylval->_string = LITERAL_BUFFER_HARVEST(); BEGIN INITIAL; return _STRING_;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 98 "Lexer.l"
+#line 99 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR(yytext[0]);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 99 "Lexer.l"
+#line 100 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('\f'); BEGIN STRING;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 100 "Lexer.l"
+#line 101 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('\n'); BEGIN STRING;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 101 "Lexer.l"
+#line 102 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('\r'); BEGIN STRING;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 102 "Lexer.l"
+#line 103 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('\t'); BEGIN STRING;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 103 "Lexer.l"
+#line 104 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('"');  BEGIN STRING;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 104 "Lexer.l"
+#line 105 "Lexer.l"
 LITERAL_BUFFER_APPEND_CHAR('\\'); BEGIN STRING;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 105 "Lexer.l"
+#line 106 "Lexer.l"
 LITERAL_BUFFER_APPEND(yytext);    BEGIN STRING;
 	YY_BREAK
 case YY_STATE_EOF(STRING):
 case YY_STATE_EOF(ESCAPED):
-#line 106 "Lexer.l"
+#line 107 "Lexer.l"
 LITERAL_BUFFER_FREE(); return _ERROR_;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 107 "Lexer.l"
+#line 108 "Lexer.l"
 yylval->_int = atoi(yytext); return _INTEGER_;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 108 "Lexer.l"
+#line 109 "Lexer.l"
 yylval->_string = strdup(yytext); return _IDENT_;
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 109 "Lexer.l"
+#line 110 "Lexer.l"
 /* ignore white space. */;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 110 "Lexer.l"
+#line 111 "Lexer.l"
 return _ERROR_;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 112 "Lexer.l"
+#line 113 "Lexer.l"
 ECHO;
 	YY_BREAK
-#line 1282 "Lexer.c"
+#line 1283 "Lexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CHAR):
 case YY_STATE_EOF(CHARESC):
@@ -2437,7 +2438,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 112 "Lexer.l"
+#line 113 "Lexer.l"
 
 
 yyscan_t initialize_lexer(FILE *inp)

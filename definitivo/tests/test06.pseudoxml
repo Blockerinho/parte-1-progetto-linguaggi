@@ -1,5 +1,0 @@
-# riferimento a sezione che non esiste in inherit
-
-<section name=sez1>
-	<inherit>sez2</inherit>
-</section>

@@ -2,53 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Parser.h"
-#include "Absyn.h"
 #include "ParserSupport.h"
-
-void usage(void) {
-  printf("usage: Call with one of the following argument combinations:\n");
-  printf("\t--help\t\tDisplay this help message.\n");
-  printf("\t(no arguments)\tParse stdin verbosely.\n");
-  printf("\t(files)\t\tParse content of files verbosely.\n");
-  printf("\t-s (files)\tSilent mode. Parse content of files silently.\n");
-}
+#include "Printer.h"
+#include "CommentTracker.h"
+#include "Parser.h"
 
 int main(int argc, char ** argv)
 {
   FILE *input;
-  int quiet = 0;
   char *filename = NULL;
 
   if (argc > 1) {
-    if (strcmp(argv[1], "-s") == 0) {
-      quiet = 1;
-      if (argc > 2) {
-        filename = argv[2];
-      } else {
-        input = stdin;
-      }
-    } else {
-      filename = argv[1];
-    }
+    filename = argv[1];
+  } else {
+    input = stdin;
   }
 
   section_entry* bindings = NULL;
+  
   if (filename) {
     pnSourceFile(filename, &bindings);
-    if (!input) {
-      usage();
-      exit(1);
-    }
+  } else {
+    pSourceFile(input, &bindings);
   }
-  else {
-    pSourceFile(stdin, &bindings);
+  
+  if (!bindings) {
+    fprintf(stderr, "Parsing failed: no bindings created\n"); 
+    return 1;
   }
-
-  if (bindings) {
-    print_bindings(bindings);
-    return 0;
-  }
-  return 1;
+  
+  char *output1 = printFromBindings(bindings);
+  printf("%s\n", output1);
 }
 

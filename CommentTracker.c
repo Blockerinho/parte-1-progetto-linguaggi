@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "comment_tracker.h"
+#include "CommentTracker.h"
 
 /* Inizializzazione della lista globale */
 comment_entry *glob_commentListHead = NULL;

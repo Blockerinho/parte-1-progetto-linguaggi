@@ -86,7 +86,7 @@ extern int pseudo_xm_lgrammatica_debug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 61 "Parser.y"
+#line 62 "Parser.y"
 
   int    _int;
   char   _char;

@@ -1,5 +1,0 @@
-# riferimento a campo non locale che non esiste
-
-<section name=sez1>
-	<field name=f11>$f12</field>
-</section>

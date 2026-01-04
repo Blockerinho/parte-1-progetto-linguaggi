@@ -18,6 +18,7 @@
 %{
 #include "Absyn.h"
 #include "Bison.h"
+#include "CommentTracker.h"
 
 #define initialize_lexer pseudo_xm_lgrammatica__initialize_lexer
 
@@ -89,7 +90,7 @@ IDENT [a-zA-Z0-9'_]
 <INITIAL>"section"      	 return _KW_section;
 <INITIAL>"true"      	 return _KW_true;
 
-<INITIAL>"#"[^\n]* /* skip */; /* BNFC: comment "#" */
+<INITIAL>"#"[^\n]* { store_comment(yylloc->first_line, yytext); }
 
 <INITIAL>{LETTER}(\_|({DIGIT}|{LETTER}))*    	 yylval->_string = strdup(yytext); return T_Ident;
 <INITIAL>"\""        	 LITERAL_BUFFER_CREATE(); BEGIN STRING;

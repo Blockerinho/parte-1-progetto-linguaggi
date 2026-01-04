@@ -1,8 +1,0 @@
-<section name=sez1> # file corretto, no conflitti, con import
-  <field name=f11>1 </field>
-  <field name=f12>"ciao" </field>
-</section>
-<section name=sez2>
-  <inherit>sez1</inherit>
-  <field name=f12>true </field> # campo sovrascritto
-</section>
