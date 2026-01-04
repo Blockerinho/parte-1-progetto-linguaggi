@@ -5,12 +5,13 @@
 #include "Absyn.h"
 #include "ParserSupport.h"
 
-section_entry* create_section_entry(char* name, section_entry* next) {
+section_entry* create_section_entry(char* name, section_entry* next, int line) {
   section_entry* myself = (section_entry*) malloc(sizeof(*myself));
   myself->name = name;
   myself->prev = NULL;
   myself->next = next;
   myself->fields = NULL;
+  myself->line = line;
 
   if (myself->next) {
     myself->next->prev = myself;
@@ -19,7 +20,7 @@ section_entry* create_section_entry(char* name, section_entry* next) {
   return myself;
 }
 
-field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings) {
+field_entry* create_field_entry(char* name, Value value, section_entry* section, field_entry* next, section_entry* bindings, int line) {
   field_entry* myself = (field_entry*) malloc(sizeof(*myself));
 
   myself->name = name;
@@ -28,6 +29,7 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
   myself->next = next;
   myself->references = NULL;
   myself->backlinks = NULL;
+  myself->line = line;
 
   if (myself->next) {
     myself->next->prev = myself;
@@ -84,7 +86,7 @@ field_entry* create_field_entry(char* name, Value value, section_entry* section,
   return myself;
 }
 
-field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from) {
+field_entry* create_field_entry_inherited(char* name, section_entry* section, field_entry* inherited_from, int line) {
   field_entry* current_field = section->fields;
   while (current_field) {
     if (strcmp(current_field->name, name) == 0) {
@@ -93,7 +95,8 @@ field_entry* create_field_entry_inherited(char* name, section_entry* section, fi
         return section->fields; // non aggiungere il nuovo campo in caso di conflitto
       } else {
         // non dovrebbe accadere perché c'è già un controllo nel parser
-        fprintf(stderr, "Error: inherited field %s comes after normal field %s in section %s.\n", name, current_field->name, section->name);        exit(1);
+        fprintf(stderr, "Error: inherited field %s comes after normal field %s in section %s.\n", name, current_field->name, section->name);
+        exit(1);
       }
     }
     current_field = current_field->next;
@@ -106,6 +109,7 @@ field_entry* create_field_entry_inherited(char* name, section_entry* section, fi
   myself->kind = is_Inherited;
   myself->prev = NULL;
   myself->next = section->fields;
+  myself->line = line; 
 
   if (myself->next) {
     myself->next->prev = myself;
@@ -134,7 +138,8 @@ field_entry* inherit_fields(char* section_name, section_entry* section, section_
 
   field_entry* ancestor_field = ancestor_section->fields;
   while (ancestor_field) {
-    section->fields = create_field_entry_inherited(ancestor_field->name, section, ancestor_field);
+    // Passa la linea della sezione corrente ai campi ereditati
+    section->fields = create_field_entry_inherited(ancestor_field->name, section, ancestor_field, section->line);
     ancestor_field = ancestor_field->next;
   }
   return section->fields;
@@ -225,7 +230,7 @@ section_entry* delete_section_entry(section_entry* section) {
 
 section_entry* delete_section_by_name(char* section_name, section_entry* bindings) {
   section_entry* section_to_delete = bindings;
-  section_entry* new_first;
+  section_entry* new_first = NULL;
   while (section_to_delete) {
     if (strcmp(section_to_delete->name, section_name) == 0) {
       new_first = delete_section_entry(section_to_delete);
@@ -265,7 +270,7 @@ void delete_field_entry(field_entry* field) {
     if (current_backlink->ptr) {
       delete_field_entry(current_backlink->ptr);
     } else {
-      fprintf(stderr, "Errore: backlink vuoto in Sezione %s, campo %s", field->section->name, field->name); // non dovrebbe succedere
+      fprintf(stderr, "Error: empty backlink in section %s, field %s", field->section->name, field->name); // non dovrebbe succedere
       exit(1);
     }
     current_backlink = current_backlink->next;
@@ -305,7 +310,7 @@ void delete_backlink(backlink* backlink, field_entry* field) {
 }
 
 void print_bindings(section_entry* bindings) {
-  printf("Pretty printing struttura dati dei bindings:\n\n");
+  printf("Pretty printing data structure for bindings :\n\n");
   field_entry* f;
   while (bindings) {
     printf("Section %s\n", bindings->name);
@@ -345,4 +350,4 @@ void print_bindings(section_entry* bindings) {
       }
       bindings = bindings->next;
     }
-  }
+}
