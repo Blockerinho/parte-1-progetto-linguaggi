@@ -9,14 +9,16 @@ FLEX_OPTS = -Ppseudo_xm_lgrammatica_
 BISON = bison
 BISON_OPTS = -t -ppseudo_xm_lgrammatica_
 
-OBJS = Absyn.o Buffer.o Lexer.o Parser.o ParserSupport.o ReferenceSolver.o
+
+# Aggiunti comment_tracker.o e printer.o alla lista degli oggetti
+OBJS = Absyn.o Buffer.o Lexer.o Parser.o ParserSupport.o ReferenceSolver.o comment_tracker.o Printer.o
 
 .PHONY : clean distclean
 
 all : TestProgram
 
 clean :
-	rm -f *.o TestpseudoXMLgrammatica pseudoXMLgrammatica.aux pseudoXMLgrammatica.log pseudoXMLgrammatica.pdf pseudoXMLgrammatica.dvi pseudoXMLgrammatica.ps pseudoXMLgrammatica
+	rm -f *.o TestProgram pseudoXMLgrammatica.aux pseudoXMLgrammatica.log pseudoXMLgrammatica.pdf pseudoXMLgrammatica.dvi pseudoXMLgrammatica.ps pseudoXMLgrammatica
 
 distclean : clean
 	rm -f Absyn.h Absyn.c Bison.h Buffer.h Buffer.c pseudoXMLgrammatica.l Lexer.c pseudoXMLgrammatica.y Parser.h Parser.c Test.c Makefile pseudoXMLgrammatica.tex
@@ -31,18 +33,27 @@ Absyn.o : Absyn.c Absyn.h
 Buffer.o : Buffer.c Buffer.h
 	${CC} ${CCFLAGS} -c Buffer.c
 
+# Regola per il comment tracker
+comment_tracker.o : comment_tracker.c comment_tracker.h
+	${CC} ${CCFLAGS} -c comment_tracker.c
+
+# Regola per il printer (dipende da Absyn per la struttura dell'AST)
+Printer.o : Printer.c Printer.h Absyn.h ParserSupport.h
+	${CC} ${CCFLAGS} -c printer.c
+
 Lexer.c : Lexer.l
 	${FLEX} ${FLEX_OPTS} -oLexer.c Lexer.l
 
 Parser.c Bison.h : Parser.y
-	${BISON} ${BISON_OPTS} Parser.y -o Parser.c
+	${BISON} ${BISON_OPTS} --defines=Bison.h Parser.y -o Parser.c
 
 Lexer.o : CCFLAGS+=-Wno-sign-conversion
 
-Lexer.o : Lexer.c Bison.h
+# Lexer ora dipende anche da comment_tracker.h
+Lexer.o : Lexer.c Bison.h comment_tracker.h
 	${CC} ${CCFLAGS} -c Lexer.c
 
-Parser.o : Parser.c Absyn.h Bison.h
+Parser.o : Parser.c Absyn.h Bison.h ParserSupport.h
 	${CC} ${CCFLAGS} -c Parser.c
 
 ReferenceSolver.o : ReferenceSolver.c ParserSupport.h
@@ -51,8 +62,10 @@ ReferenceSolver.o : ReferenceSolver.c ParserSupport.h
 ParserSupport.o : ParserSupport.c ParserSupport.h Absyn.h
 	${CC} ${CCFLAGS} -c ParserSupport.c
 
-TestProgram.o : TestProgram.c Parser.h Absyn.h
+# Aggiornate dipendenze del TestProgram
+TestProgram.o : TestProgram.c Parser.h Absyn.h printer.h comment_tracker.h
 	${CC} ${CCFLAGS} -c TestProgram.c
 
-zip: Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c tests
-	zip ProgettoLC\ parte1\ Gruppo\ 25-3.zip Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c tests
+# Aggiunti i nuovi file al target zip
+zip: Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c comment_tracker.c comment_tracker.h Printer.c Printer.h tests
+	zip ProgettoLC\ parte1\ Gruppo\ 25-3.zip Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Deletion.c Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c Test.c comment_tracker.c comment_tracker.h Printer.c Printer.h tests
