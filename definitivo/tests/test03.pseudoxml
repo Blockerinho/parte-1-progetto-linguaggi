@@ -1,0 +1,10 @@
+# riferimento a campo non locale che non esiste
+
+<section name=sez1>
+	<field name=f11>1</field>
+</section>
+
+<section name=sez2>
+	<field name=f21>$sez1.f12</field>
+</section>
+	

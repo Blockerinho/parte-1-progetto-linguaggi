@@ -1,0 +1,6 @@
+# ripetizione stesso campo
+
+<section name=sez1>
+	<field name=f11>1</field>
+	<field name=f11>true</field>
+</section>
