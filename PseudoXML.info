@@ -1,0 +1,493 @@
+Terminals unused in grammar
+
+    _ERROR_
+    _IDENT_
+
+
+Grammar
+
+    0 $accept: SourceFile $end
+
+    1 SourceFile: ListTopLevelTag
+
+    2 ListTopLevelTag: ε
+    3                | ListTopLevelTag TopLevelTag
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT
+    5            | _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    6 ListSubLevelTag: ε
+    7                | ListSubLevelTag SubLevelTag
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT
+    9            | _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT
+
+   10 Value: _INTEGER_
+   11      | Boolean
+   12      | _STRING_
+   13      | NonLocVar
+
+   14 Boolean: _KW_true
+   15        | _KW_false
+
+   16 NonLocVar: _DOLLAR T_Ident
+   17          | _DOLLAR T_Ident _DOT T_Ident
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    _ERROR_ (258)
+    _DOLLAR (259) 16 17
+    _DOT (260) 17
+    _SLASH (261) 4 5 8 9
+    _LT (262) 4 5 8 9
+    _EQ (263) 5 8
+    _GT (264) 4 5 8 9
+    _KW_false (265) 15
+    _KW_field (266) 8
+    _KW_import (267) 4
+    _KW_inherit (268) 9
+    _KW_name (269) 5 8
+    _KW_section (270) 5
+    _KW_true (271) 14
+    T_Ident <_string> (272) 5 8 9 16 17
+    _STRING_ <_string> (273) 4 12
+    _INTEGER_ <_int> (274) 10
+    _IDENT_ <_string> (275)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (21)
+        on left: 0
+    SourceFile <sourcefile_> (22)
+        on left: 1
+        on right: 0
+    ListTopLevelTag <listtopleveltag_> (23)
+        on left: 2 3
+        on right: 1 3
+    TopLevelTag <topleveltag_> (24)
+        on left: 4 5
+        on right: 3
+    ListSubLevelTag <listsubleveltag_> (25)
+        on left: 6 7
+        on right: 5 7
+    SubLevelTag <subleveltag_> (26)
+        on left: 8 9
+        on right: 7
+    Value <value_> (27)
+        on left: 10 11 12 13
+        on right: 8
+    Boolean <boolean_> (28)
+        on left: 14 15
+        on right: 11
+    NonLocVar <nonlocvar_> (29)
+        on left: 16 17
+        on right: 13
+
+
+State 0
+
+    0 $accept: • SourceFile $end
+    1 SourceFile: • ListTopLevelTag
+    2 ListTopLevelTag: ε •
+    3                | • ListTopLevelTag TopLevelTag
+
+    $default  reduce using rule 2 (ListTopLevelTag)
+
+    SourceFile       go to state 1
+    ListTopLevelTag  go to state 2
+
+
+State 1
+
+    0 $accept: SourceFile • $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    1 SourceFile: ListTopLevelTag •  [$end]
+    3 ListTopLevelTag: ListTopLevelTag • TopLevelTag
+    4 TopLevelTag: • _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT
+    5            | • _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    _LT  shift, and go to state 4
+
+    $default  reduce using rule 1 (SourceFile)
+
+    TopLevelTag  go to state 5
+
+
+State 3
+
+    0 $accept: SourceFile $end •
+
+    $default  accept
+
+
+State 4
+
+    4 TopLevelTag: _LT • _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT
+    5            | _LT • _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    _KW_import   shift, and go to state 6
+    _KW_section  shift, and go to state 7
+
+
+State 5
+
+    3 ListTopLevelTag: ListTopLevelTag TopLevelTag •
+
+    $default  reduce using rule 3 (ListTopLevelTag)
+
+
+State 6
+
+    4 TopLevelTag: _LT _KW_import • _GT _STRING_ _LT _SLASH _KW_import _GT
+
+    _GT  shift, and go to state 8
+
+
+State 7
+
+    5 TopLevelTag: _LT _KW_section • _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    _KW_name  shift, and go to state 9
+
+
+State 8
+
+    4 TopLevelTag: _LT _KW_import _GT • _STRING_ _LT _SLASH _KW_import _GT
+
+    _STRING_  shift, and go to state 10
+
+
+State 9
+
+    5 TopLevelTag: _LT _KW_section _KW_name • _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    _EQ  shift, and go to state 11
+
+
+State 10
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ • _LT _SLASH _KW_import _GT
+
+    _LT  shift, and go to state 12
+
+
+State 11
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ • T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    T_Ident  shift, and go to state 13
+
+
+State 12
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ _LT • _SLASH _KW_import _GT
+
+    _SLASH  shift, and go to state 14
+
+
+State 13
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident • _GT ListSubLevelTag _LT _SLASH _KW_section _GT
+
+    _GT  shift, and go to state 15
+
+
+State 14
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH • _KW_import _GT
+
+    _KW_import  shift, and go to state 16
+
+
+State 15
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT • ListSubLevelTag _LT _SLASH _KW_section _GT
+    6 ListSubLevelTag: ε •
+    7                | • ListSubLevelTag SubLevelTag
+
+    $default  reduce using rule 6 (ListSubLevelTag)
+
+    ListSubLevelTag  go to state 17
+
+
+State 16
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import • _GT
+
+    _GT  shift, and go to state 18
+
+
+State 17
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag • _LT _SLASH _KW_section _GT
+    7 ListSubLevelTag: ListSubLevelTag • SubLevelTag
+    8 SubLevelTag: • _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT
+    9            | • _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT
+
+    _LT  shift, and go to state 19
+
+    SubLevelTag  go to state 20
+
+
+State 18
+
+    4 TopLevelTag: _LT _KW_import _GT _STRING_ _LT _SLASH _KW_import _GT •
+
+    $default  reduce using rule 4 (TopLevelTag)
+
+
+State 19
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT • _SLASH _KW_section _GT
+    8 SubLevelTag: _LT • _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT
+    9            | _LT • _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT
+
+    _SLASH       shift, and go to state 21
+    _KW_field    shift, and go to state 22
+    _KW_inherit  shift, and go to state 23
+
+
+State 20
+
+    7 ListSubLevelTag: ListSubLevelTag SubLevelTag •
+
+    $default  reduce using rule 7 (ListSubLevelTag)
+
+
+State 21
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH • _KW_section _GT
+
+    _KW_section  shift, and go to state 24
+
+
+State 22
+
+    8 SubLevelTag: _LT _KW_field • _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT
+
+    _KW_name  shift, and go to state 25
+
+
+State 23
+
+    9 SubLevelTag: _LT _KW_inherit • _GT T_Ident _LT _SLASH _KW_inherit _GT
+
+    _GT  shift, and go to state 26
+
+
+State 24
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section • _GT
+
+    _GT  shift, and go to state 27
+
+
+State 25
+
+    8 SubLevelTag: _LT _KW_field _KW_name • _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT
+
+    _EQ  shift, and go to state 28
+
+
+State 26
+
+    9 SubLevelTag: _LT _KW_inherit _GT • T_Ident _LT _SLASH _KW_inherit _GT
+
+    T_Ident  shift, and go to state 29
+
+
+State 27
+
+    5 TopLevelTag: _LT _KW_section _KW_name _EQ T_Ident _GT ListSubLevelTag _LT _SLASH _KW_section _GT •
+
+    $default  reduce using rule 5 (TopLevelTag)
+
+
+State 28
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ • T_Ident _GT Value _LT _SLASH _KW_field _GT
+
+    T_Ident  shift, and go to state 30
+
+
+State 29
+
+    9 SubLevelTag: _LT _KW_inherit _GT T_Ident • _LT _SLASH _KW_inherit _GT
+
+    _LT  shift, and go to state 31
+
+
+State 30
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident • _GT Value _LT _SLASH _KW_field _GT
+
+    _GT  shift, and go to state 32
+
+
+State 31
+
+    9 SubLevelTag: _LT _KW_inherit _GT T_Ident _LT • _SLASH _KW_inherit _GT
+
+    _SLASH  shift, and go to state 33
+
+
+State 32
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT • Value _LT _SLASH _KW_field _GT
+   10 Value: • _INTEGER_
+   11      | • Boolean
+   12      | • _STRING_
+   13      | • NonLocVar
+   14 Boolean: • _KW_true
+   15        | • _KW_false
+   16 NonLocVar: • _DOLLAR T_Ident
+   17          | • _DOLLAR T_Ident _DOT T_Ident
+
+    _DOLLAR    shift, and go to state 34
+    _KW_false  shift, and go to state 35
+    _KW_true   shift, and go to state 36
+    _STRING_   shift, and go to state 37
+    _INTEGER_  shift, and go to state 38
+
+    Value      go to state 39
+    Boolean    go to state 40
+    NonLocVar  go to state 41
+
+
+State 33
+
+    9 SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH • _KW_inherit _GT
+
+    _KW_inherit  shift, and go to state 42
+
+
+State 34
+
+   16 NonLocVar: _DOLLAR • T_Ident
+   17          | _DOLLAR • T_Ident _DOT T_Ident
+
+    T_Ident  shift, and go to state 43
+
+
+State 35
+
+   15 Boolean: _KW_false •
+
+    $default  reduce using rule 15 (Boolean)
+
+
+State 36
+
+   14 Boolean: _KW_true •
+
+    $default  reduce using rule 14 (Boolean)
+
+
+State 37
+
+   12 Value: _STRING_ •
+
+    $default  reduce using rule 12 (Value)
+
+
+State 38
+
+   10 Value: _INTEGER_ •
+
+    $default  reduce using rule 10 (Value)
+
+
+State 39
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value • _LT _SLASH _KW_field _GT
+
+    _LT  shift, and go to state 44
+
+
+State 40
+
+   11 Value: Boolean •
+
+    $default  reduce using rule 11 (Value)
+
+
+State 41
+
+   13 Value: NonLocVar •
+
+    $default  reduce using rule 13 (Value)
+
+
+State 42
+
+    9 SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit • _GT
+
+    _GT  shift, and go to state 45
+
+
+State 43
+
+   16 NonLocVar: _DOLLAR T_Ident •  [_LT]
+   17          | _DOLLAR T_Ident • _DOT T_Ident
+
+    _DOT  shift, and go to state 46
+
+    $default  reduce using rule 16 (NonLocVar)
+
+
+State 44
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT • _SLASH _KW_field _GT
+
+    _SLASH  shift, and go to state 47
+
+
+State 45
+
+    9 SubLevelTag: _LT _KW_inherit _GT T_Ident _LT _SLASH _KW_inherit _GT •
+
+    $default  reduce using rule 9 (SubLevelTag)
+
+
+State 46
+
+   17 NonLocVar: _DOLLAR T_Ident _DOT • T_Ident
+
+    T_Ident  shift, and go to state 48
+
+
+State 47
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH • _KW_field _GT
+
+    _KW_field  shift, and go to state 49
+
+
+State 48
+
+   17 NonLocVar: _DOLLAR T_Ident _DOT T_Ident •
+
+    $default  reduce using rule 17 (NonLocVar)
+
+
+State 49
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field • _GT
+
+    _GT  shift, and go to state 50
+
+
+State 50
+
+    8 SubLevelTag: _LT _KW_field _KW_name _EQ T_Ident _GT Value _LT _SLASH _KW_field _GT •
+
+    $default  reduce using rule 8 (SubLevelTag)

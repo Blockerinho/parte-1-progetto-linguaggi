@@ -1,0 +1,36 @@
+# 2. Test Sezione Semplice con Tipi Primitivi
+<section name=BaseSettings>
+    # Commento sopra un campo intero
+    <field name=timeout>120</field> # Commento inline (timeout in secondi)
+    
+    <field name=enable_logs>true</field>
+    <field name=app_name>"SuperParser v1.0"</field> # Stringa con spazi
+</section>
+
+# 3. Test Ereditarietà e Override
+<section name=ProductionSettings>
+    
+    # Sovrascrittura: cambia la porta di default
+    <field name=default_port>9000</field> # Override da 8080 a 9000
+    
+    # Nuovo campo specifico
+    <field name=mode>"PROD"</field>
+</section>
+
+# 4. Test Riferimenti (Locali e Non Locali) e Annidamento
+<section name=AdvancedFeatures>
+    
+    <field name=local_ref>"mode"</field>
+    
+    <field name=target_port>$ProductionSettings.default_port</field>
+    
+    <field name=retry_strategy>"exponential"</field>
+    
+</section>
+
+# 5. Sezione Vuota (Edge Case)
+<section name=EmptySection>
+    # Questa sezione non ha campi, solo un commento
+</section>
+
+# Commento finale orfano alla fine del file
