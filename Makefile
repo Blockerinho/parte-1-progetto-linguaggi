@@ -1,5 +1,6 @@
 CC = gcc -g
-CCFLAGS = -std=c11 -W -Wall -Wsign-conversion -Wno-unused-parameter -Wno-unused-function -Wno-unneeded-internal-declaration ${CC_OPTS}
+# CCFLAGS = -std=c11 -W -Wall -Wsign-conversion -Wno-unused-parameter -Wno-unused-function -Wno-unneeded-internal-declaration ${CC_OPTS}
+CCFLAGS = -D DETECT_IMPORT_CYCLES=1 -std=c11 -W -Wall -Wsign-conversion -Wno-unused-parameter -Wno-unused-function -Wno-unneeded-internal-declaration ${CC_OPTS}
 
 FLEX = flex
 FLEX_OPTS = -Ppseudo_xm_lgrammatica_
