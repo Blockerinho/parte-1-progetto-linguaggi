@@ -52,8 +52,8 @@ ParserSupport.o : ParserSupport.c ParserSupport.h Absyn.h
 TestProgram.o : TestProgram.c Parser.h Absyn.h Printer.h CommentTracker.h
 	${CC} ${CCFLAGS} -c TestProgram.c
 
-zip: Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c TestProgram.c CommentTracker.c CommentTracker.h Printer.c Printer.h tests
-	zip ProgettoLC\ parte1\ Gruppo\ 25-3.zip Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c TestProgram.c CommentTracker.c CommentTracker.h Printer.c Printer.h tests/*.pseudoxml
+zip: 
+	zip ProgettoLC\ parte1\ Gruppo\ 25-3.zip Absyn.c Absyn.h Bison.h Buffer.c Buffer.h Lexer.l Makefile Parser.h ParserSupport.c ParserSupport.h Parser.y PseudoXML.cf ReferenceSolver.c TestProgram.c CommentTracker.c CommentTracker.h Printer.c Printer.h tests/*.pseudoxml ProgettoLC\ parte1\ Gruppo\ 25-3\ Relazione.pdf
 
 demo: TestProgram
 	-./TestProgram tests/test01.pseudoxml
